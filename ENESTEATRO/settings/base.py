@@ -91,11 +91,27 @@ WSGI_APPLICATION = 'ENESTEATRO.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
+        # 'ENGINE': 'django.db.backends.sqlite3',
+        'ENGINE': 'django.contrib.gis.db.backends.spatialite',
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
 }
 
+"""
+OSGEO_VENV = 'C:\\Anaconda3\\Library\\bin'
+GEOS_LIBRARY_PATH = str(OSGEO_VENV + '\\geos_c.dll')
+GDAL_LIBRARY_PATH = str(OSGEO_VENV + '\\gdal203.dll')
+os.environ["PATH"] += os.pathsep + str(OSGEO_VENV)
+"""
+
+# """
+OSGEO_VENV = 'C:\\Anaconda3\\Lib\\site-packages\\osgeo'
+GEOS_LIBRARY_PATH = str(OSGEO_VENV + '\\geos_c.dll')
+GDAL_LIBRARY_PATH = str(OSGEO_VENV + '\\gdal300.dll')
+#SPATIALITE_LIBRARY_PATH = str(OSGEO_VENV + '\\mod_spatialite')
+# SPATIALITE_LIBRARY_PATH = 'mod_spatialite.dll'
+os.environ["PATH"] += os.pathsep + str(OSGEO_VENV)
+# """
 
 # Password validation
 # https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators
