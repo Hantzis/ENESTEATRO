@@ -10,6 +10,8 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
+DEBUG = True
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
 
@@ -41,6 +43,9 @@ INSTALLED_APPS = [
 
     'modelcluster',
     'taggit',
+    'django.contrib.gis',
+    'rest_framework',
+    'webpack_loader',
 
     'django.contrib.admin',
     'django.contrib.auth',
@@ -48,7 +53,17 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'base',
 ]
+
+
+REST_FRAMEWORK = {
+    # Use Django's standard `django.contrib.auth` permissions,
+    # or allow read-only access for unauthenticated users.
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
+    ]
+}
 
 MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -58,6 +73,8 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    
+    'crum.CurrentRequestUserMiddleware',
 
     'wagtail.core.middleware.SiteMiddleware',
     'wagtail.contrib.redirects.middleware.RedirectMiddleware',
@@ -70,6 +87,7 @@ TEMPLATES = [
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
             os.path.join(PROJECT_DIR, 'templates'),
+            # TEMPLATES_DIR,
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -82,6 +100,9 @@ TEMPLATES = [
         },
     },
 ]
+
+# TEMPLATES_DIR = os.path.join(BASE_DIR, 'templates')
+FRONTEND_DIR = os.path.join(BASE_DIR, 'frontend')
 
 WSGI_APPLICATION = 'ENESTEATRO.wsgi.application'
 
@@ -104,14 +125,14 @@ GDAL_LIBRARY_PATH = str(OSGEO_VENV + '\\gdal203.dll')
 os.environ["PATH"] += os.pathsep + str(OSGEO_VENV)
 """
 
-# """
+"""
 OSGEO_VENV = 'C:\\Anaconda3\\Lib\\site-packages\\osgeo'
 GEOS_LIBRARY_PATH = str(OSGEO_VENV + '\\geos_c.dll')
 GDAL_LIBRARY_PATH = str(OSGEO_VENV + '\\gdal300.dll')
 #SPATIALITE_LIBRARY_PATH = str(OSGEO_VENV + '\\mod_spatialite')
 # SPATIALITE_LIBRARY_PATH = 'mod_spatialite.dll'
 os.environ["PATH"] += os.pathsep + str(OSGEO_VENV)
-# """
+"""
 
 # Password validation
 # https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators
@@ -135,7 +156,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/2.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'es-mx'
 
 TIME_ZONE = 'UTC'
 
@@ -176,4 +197,14 @@ WAGTAIL_SITE_NAME = "ENESTEATRO"
 
 # Base URL to use when referring to full URLs within the Wagtail admin backend -
 # e.g. in notification emails. Don't include '/admin' or a trailing slash
-BASE_URL = 'http://example.com'
+BASE_URL = 'https://teatroudir.enmorelia.net'
+
+
+
+WEBPACK_LOADER = {
+    'DEFAULT': {
+        'CACHE': DEBUG,
+        'BUNDLE_DIR_NAME': '/bundles/',  # must end with slash
+        'STATS_FILE': os.path.join(FRONTEND_DIR, 'webpack-stats.json'),
+    }
+}

@@ -1,12 +1,19 @@
 from django.conf import settings
-from django.conf.urls import include, url
+from django.conf.urls import include, url 
+from django.urls import path
 from django.contrib import admin
+from django.views.generic import TemplateView
 
 from wagtail.admin import urls as wagtailadmin_urls
 from wagtail.core import urls as wagtail_urls
 from wagtail.documents import urls as wagtaildocs_urls
 
+
 from search import views as search_views
+from base.views import *
+
+
+
 
 urlpatterns = [
     url(r'^django-admin/', admin.site.urls),
@@ -15,11 +22,17 @@ urlpatterns = [
     url(r'^documents/', include(wagtaildocs_urls)),
 
     url(r'^search/$', search_views.search, name='search'),
+    url(r'^api-auth/', include('rest_framework.urls')),
+
+    url(r'^api/v1/$', APIRootView.as_view()),
+    url(r'^api/v1/', include('base.apiurls')),
 
     # For anything not caught by a more specific rule above, hand over to
     # Wagtail's page serving mechanism. This should be the last pattern in
     # the list:
-    url(r'', include(wagtail_urls)),
+
+    ### url(r'', include(wagtail_urls)),
+    path("", TemplateView.as_view(template_name="application.html"), name="app", ),
 
     # Alternatively, if you want Wagtail pages to be served from a subpath
     # of your site, rather than the site root:
