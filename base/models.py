@@ -68,7 +68,8 @@ class Registro(ClusterableModel):
     fechas = models.ManyToManyField(Fecha, blank=True)
     lugar = models.ForeignKey(Lugar, on_delete=models.PROTECT)
     ramos = models.ManyToManyField(Ramo, blank=True)
-    encabezados = models.TextField(blank=True, null=True)
+    encabezado = models.TextField(blank=True, null=True)
+    descripcion = models.TextField(blank=True, null=True)
     notas = models.TextField(blank=True, null=True)
     transcripcion = models.TextField(blank=True, null=True)
     etiquetas = ClusterTaggableManager(through='RegistroEtiqueta', blank=True)
@@ -76,5 +77,4 @@ class Registro(ClusterableModel):
     fecha_registro = models.DateField(auto_now_add=True)
 
     def save(self, *args, **kwargs):
-        #self.usuario = get_current_user()
         super(Registro, self).save(*args, **kwargs)

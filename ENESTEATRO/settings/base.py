@@ -82,12 +82,15 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'ENESTEATRO.urls'
 
+TEMPLATES_DIR = os.path.join(PROJECT_DIR, 'templates')
+FRONTEND_DIR = os.path.join(PROJECT_DIR, 'frontend')
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
-            os.path.join(PROJECT_DIR, 'templates'),
-            # TEMPLATES_DIR,
+            #os.path.join(PROJECT_DIR, 'templates'),
+            TEMPLATES_DIR,
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -101,8 +104,6 @@ TEMPLATES = [
     },
 ]
 
-# TEMPLATES_DIR = os.path.join(BASE_DIR, 'templates')
-FRONTEND_DIR = os.path.join(BASE_DIR, 'frontend')
 
 WSGI_APPLICATION = 'ENESTEATRO.wsgi.application'
 

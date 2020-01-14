@@ -1,12 +1,26 @@
 from rest_framework import serializers
-from . models import *
+from .. models import *
+
+
+
+class RegistroSerializer(serializers.ModelSerializer):
+    #id = serializers.HyperlinkedRelatedField(read_only=True, view_name='registro-detail')
+    archivo = serializers.HyperlinkedRelatedField(queryset=Archivo.objects.get(pk=pk), view_name='archivo-detail')
+    fondo = serializers.StringRelatedField(read_only=True)
+    lugar = serializers.StringRelatedField(read_only=True)
+    usuario = serializers.StringRelatedField(read_only=True)
+
+    class Meta:
+        model = Registro
+        fields = '__all__'
+
 
 
 class ArchivoSerializer(serializers.HyperlinkedModelSerializer):
+    registros = RegistroSerializer(many=True, read_only=True)
     class Meta:
         model = Archivo
-        exclude = []
-
+        fields = '__all__'
 
 class ArchivoSerializer(serializers.ModelSerializer):
     class Meta:
@@ -33,7 +47,3 @@ class FechaSerializer(serializers.ModelSerializer):
         model = Fecha
         fields = '__all__'
 
-class RegistroSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Registro
-        fields = '__all__'
