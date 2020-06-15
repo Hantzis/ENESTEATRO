@@ -1,46 +1,91 @@
 <template>
-  <q-layout view="lHh LpR fFf">
+  <q-layout view="lhh lpR fFf">
 
     <q-header elevated class="bg-primary text-white" height-hint="98">
       <q-toolbar>
-        <q-btn dense flat round icon="menu" @click="left = !left" />
-
+        <q-btn dense flat round icon="menu" @click="leftDrawer = !leftDrawer"/>
         <q-toolbar-title>
-          <q-avatar>
-            <img src="https://cdn.quasar.dev/logo/svg/quasar-logo.svg">
-          </q-avatar>
-          Title
+          Los Falconi
         </q-toolbar-title>
-
-        <q-btn dense flat round icon="menu" @click="right = !right" />
+        {{ todaysDate }}
       </q-toolbar>
-
-      <q-tabs align="left">
-        <q-route-tab to="/page1" label="Page One" />
-        <q-route-tab to="/page2" label="Page Two" />
-        <q-route-tab to="/page3" label="Page Three" />
+      <q-tabs align="right">
+        <q-route-tab to="" label="Uno"/>
+        <q-route-tab to="" label="Dos"/>
+        <q-route-tab to="" label="Tres"/>
       </q-tabs>
     </q-header>
 
-    <q-drawer show-if-above v-model="left" side="left" bordered>
-      <!-- drawer content -->
-    </q-drawer>
 
-    <q-drawer v-model="right" side="right" overlay behavior="mobile" bordered>
-      <!-- drawer content -->
+    <q-drawer
+      v-model="leftDrawer"
+      :breakpoint="400"
+    >
+      <q-scroll-area style="height: calc(100% - 142px); margin-top: 142px; border-right: 1px solid #ddd">
+        <q-list padding>
+          <q-item to="/registros/" clickable v-ripple>
+            <q-item-section avatar>
+              <q-icon name="inbox"/>
+            </q-item-section>
+
+            <q-item-section>
+              Registros
+            </q-item-section>
+          </q-item>
+
+          <q-item to="/nuevo-registro/" clickable v-ripple>
+            <q-item-section avatar>
+              <q-icon name="star"/>
+            </q-item-section>
+
+            <q-item-section>
+              Agregar nuevo
+            </q-item-section>
+          </q-item>
+
+          <q-item clickable v-ripple>
+            <q-item-section avatar>
+              <q-icon name="send"/>
+            </q-item-section>
+
+            <q-item-section>
+              Send
+            </q-item-section>
+          </q-item>
+
+          <q-item clickable v-ripple>
+            <q-item-section avatar>
+              <q-icon name="drafts"/>
+            </q-item-section>
+
+            <q-item-section>
+              Drafts
+            </q-item-section>
+          </q-item>
+        </q-list>
+      </q-scroll-area>
+
+      <q-img class="absolute-top" src="https://cdn.quasar.dev/img/material.png" style="height: 150px">
+        <div class="absolute-bottom bg-transparent">
+          <q-avatar size="56px" class="q-mb-sm">
+            <img :src="get_gravatar('mathereall@gmail.com', 150)">
+          </q-avatar>
+          <div class="text-weight-bold">César Benjamín García Martínez</div>
+          <div>mathereall@gmail.com</div>
+        </div>
+      </q-img>
     </q-drawer>
 
     <q-page-container>
-      <router-view />
+      <keep-alive>
+        <router-view/>
+      </keep-alive>
     </q-page-container>
 
     <q-footer elevated class="bg-grey-8 text-white">
-      <q-toolbar>
-        <q-toolbar-title>
-          <q-avatar>
-            <img src="https://cdn.quasar.dev/logo/svg/quasar-logo.svg">
-          </q-avatar>
-          Title
+      <q-toolbar style="min-height: 30px;">
+        <q-toolbar-title style="font-size: 12px;">
+          2020 &copy; UDIR - ENES Morelia
         </q-toolbar-title>
       </q-toolbar>
     </q-footer>
@@ -49,74 +94,26 @@
 </template>
 
 <script>
-export default {
-  data () {
-    return {
-      left: false,
-      right: false
+  import {date} from 'quasar'
+  import md5 from 'crypto-md5';
+
+  export default {
+    data() {
+      return {
+        leftDrawer: false
+      }
+    },
+    computed: {
+      todaysDate() {
+        let timeStamp = Date.now()
+        return date.formatDate(timeStamp, 'YYYY-MM-DD')
+      }
+    },
+    methods: {
+      get_gravatar(email, argsize) {
+        const size = argsize
+        return 'http://www.gravatar.com/avatar/' + md5(email.trim().toLowerCase(), 'hex') + '.jpg?s=' + size;
+      }
     }
   }
-}
-</script>
-
-<script>
-import EssentialLink from 'components/EssentialLink'
-
-export default {
-  name: 'MainLayout',
-
-  components: {
-    EssentialLink
-  },
-
-  data () {
-    return {
-      leftDrawerOpen: false,
-      essentialLinks: [
-        {
-          title: 'Docs',
-          caption: 'quasar.dev',
-          icon: 'school',
-          link: 'https://quasar.dev'
-        },
-        {
-          title: 'Github',
-          caption: 'github.com/quasarframework',
-          icon: 'code',
-          link: 'https://github.com/quasarframework'
-        },
-        {
-          title: 'Discord Chat Channel',
-          caption: 'chat.quasar.dev',
-          icon: 'chat',
-          link: 'https://chat.quasar.dev'
-        },
-        {
-          title: 'Forum',
-          caption: 'forum.quasar.dev',
-          icon: 'record_voice_over',
-          link: 'https://forum.quasar.dev'
-        },
-        {
-          title: 'Twitter',
-          caption: '@quasarframework',
-          icon: 'rss_feed',
-          link: 'https://twitter.quasar.dev'
-        },
-        {
-          title: 'Facebook',
-          caption: '@QuasarFramework',
-          icon: 'public',
-          link: 'https://facebook.quasar.dev'
-        },
-        {
-          title: 'Quasar Awesome',
-          caption: 'Community Quasar projects',
-          icon: 'favorite',
-          link: 'https://awesome.quasar.dev'
-        }
-      ]
-    }
-  }
-}
 </script>
