@@ -7,7 +7,7 @@
       </q-breadcrumbs>
     </div>
     <div class="row" style="padding-bottom: 10px;">
-      <div class="col" align="right">
+      <div class="col" :align="'right'">
         <q-btn color="primary" style="margin-right: 12px;" @click="getArchivos()">
           <q-icon left dense size="2em" name="mdi-sync" style="margin-right: -10px; margin-left: -10px;"/>
         </q-btn>
@@ -173,7 +173,7 @@ export default {
       if (this.archivo_nombre) {
         let existe = false;
         for (let item of this.datos_archivos) {
-          if (item.nombre == this.archivo_nombre) {
+          if (item.nombre === this.archivo_nombre) {
             existe = true
             console.log("existe")
           }
@@ -186,7 +186,7 @@ export default {
     mensaje_error() {
       let mensaje = ""
       for (let item of this.datos_archivos) {
-        if (item.nombre == this.archivo_nombre) {
+        if (item.nombre === this.archivo_nombre) {
           mensaje += "Ya existe un arhivo con ese nombre. "
           console.log("existe")
         }
