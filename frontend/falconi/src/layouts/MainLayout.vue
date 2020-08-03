@@ -9,11 +9,11 @@
         </q-toolbar-title>
         {{ todaysDate }}
       </q-toolbar>
-      <q-tabs align="right">
+      <!-- <q-tabs align="right">
         <q-route-tab to="" label="Uno"/>
         <q-route-tab to="" label="Dos"/>
         <q-route-tab to="" label="Tres"/>
-      </q-tabs>
+      </q-tabs> -->
     </q-header>
 
 
@@ -23,6 +23,16 @@
     >
       <q-scroll-area style="height: calc(100% - 142px); margin-top: 142px; border-right: 1px solid #ddd">
         <q-list padding>
+          <q-item to="/" clickable v-ripple>
+            <q-item-section avatar>
+              <q-icon name="home"/>
+            </q-item-section>
+
+            <q-item-section>
+              Inicio
+            </q-item-section>
+
+          </q-item>
           <q-item to="/registros/" clickable v-ripple>
             <q-item-section avatar>
               <q-icon name="inbox"/>
@@ -33,33 +43,44 @@
             </q-item-section>
           </q-item>
 
-          <q-item to="/nuevo-registro/" clickable v-ripple>
-            <q-item-section avatar>
-              <q-icon name="star"/>
-            </q-item-section>
+          <q-separator></q-separator>
 
-            <q-item-section>
-              Agregar nuevo
-            </q-item-section>
-          </q-item>
-
-          <q-item clickable v-ripple>
-            <q-item-section avatar>
-              <q-icon name="send"/>
-            </q-item-section>
-
-            <q-item-section>
-              Send
-            </q-item-section>
-          </q-item>
-
-          <q-item clickable v-ripple>
+          <q-item to="/archivos/" clickable v-ripple>
             <q-item-section avatar>
               <q-icon name="drafts"/>
             </q-item-section>
+            <q-item-section>
+              Archivos
+            </q-item-section>
+          </q-item>
+
+          <q-item clickable v-ripple>
+            <q-item-section avatar>
+              <q-icon name="mdi-file"/>
+            </q-item-section>
 
             <q-item-section>
-              Drafts
+              Fondos
+            </q-item-section>
+          </q-item>
+
+          <q-item clickable v-ripple>
+            <q-item-section avatar>
+              <q-icon name="place"/>
+            </q-item-section>
+
+            <q-item-section>
+              Lugares
+            </q-item-section>
+          </q-item>
+
+          <q-item clickable v-ripple>
+            <q-item-section avatar>
+              <q-icon name="mdi-git"/>
+            </q-item-section>
+
+            <q-item-section>
+              Ramos
             </q-item-section>
           </q-item>
         </q-list>

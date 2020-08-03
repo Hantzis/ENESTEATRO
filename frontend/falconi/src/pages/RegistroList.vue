@@ -24,6 +24,7 @@
 </template>
 
 <script>
+
   export default {
     name: 'PageIndex',
     data() {
@@ -38,7 +39,12 @@
           rowsNumber: 10
         },
         columns: [
-          {name: 'id', align: 'left', label: 'ID', field: 'id', sortable: true},
+          {name: 'archivo', align: 'left', label: 'Archivo', field: 'archivo', sortable: true},
+          {name: 'fondo', align: 'left', label: 'Fondo', field: 'fondo', sortable: true},
+          {name: 'libro', align: 'left', label: 'Libro', field: 'libro', sortable: true},
+          {name: 'foja', align: 'left', label: 'Foja', field: 'foja', sortable: true},
+          {name: 'expediente', align: 'left', label: 'Expediente', field: 'expediente', sortable: true},
+          {name: 'años', align: 'left', label: 'Años', field: 'años', sortable: true},
           {
             name: 'desc',
             required: true,
@@ -115,6 +121,7 @@
     },
     mounted () {
       // get initial data from server (1st page)
+      console.log("DB ARCHIVO: ", 2);
       this.onRequest({
         pagination: this.pagination,
         filter: undefined
