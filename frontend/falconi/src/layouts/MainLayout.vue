@@ -16,14 +16,13 @@
       </q-tabs> -->
     </q-header>
 
-
     <q-drawer
       v-model="leftDrawer"
       :breakpoint="400"
     >
       <q-scroll-area style="height: calc(100% - 142px); margin-top: 142px; border-right: 1px solid #ddd">
         <q-list padding>
-          <q-item to="/" clickable v-ripple>
+          <q-item to="/" clickable v-ripple exact>
             <q-item-section avatar>
               <q-icon name="home"/>
             </q-item-section>
@@ -33,7 +32,7 @@
             </q-item-section>
 
           </q-item>
-          <q-item to="/registros/" clickable v-ripple>
+          <q-item to="registros" clickable v-ripple>
             <q-item-section avatar>
               <q-icon name="inbox"/>
             </q-item-section>
@@ -45,7 +44,7 @@
 
           <q-separator></q-separator>
 
-          <q-item to="/archivos/" clickable v-ripple>
+          <q-item to="archivos" clickable v-ripple>
             <q-item-section avatar>
               <q-icon name="drafts"/>
             </q-item-section>
