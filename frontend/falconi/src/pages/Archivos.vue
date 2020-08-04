@@ -3,7 +3,7 @@
     <div class="row">
       <q-breadcrumbs>
         <q-breadcrumbs-el icon="home"/>
-        <q-breadcrumbs-el label="Archivos" icon="drafts"/>
+        <q-breadcrumbs-el label="Archivos" icon="mdi-semantic-web"/>
       </q-breadcrumbs>
     </div>
     <div class="row" style="padding-bottom: 10px;">
@@ -24,7 +24,7 @@
           :data.sync="datos_archivos"
           :columns="columns"
           row-key="id"
-          :grid="$q.screen.xs"
+          :grid1="$q.screen.xs"
           :loading="tabla_loading"
           :filter="filter"
         >
@@ -127,7 +127,6 @@ export default {
       editar_archivo_id: undefined,
       eliminar_archivo_nombre: undefined,
       eliminar_archivo_id: undefined,
-      filas_productos_esvalido: false,
       columns: [
         {name: 'nombre', align: 'left', label: 'Nombre de Archivo', field: 'nombre', sortable: true},
         {name: 'actions', label: '', field: 'actions', align: 'right'},
@@ -146,31 +145,12 @@ export default {
         const resDB = await firebaseDB.collection('Archivo').get()
         this.datos_archivos = []
         resDB.forEach(res => {
-          console.log("res: ", res.data())
           const archivo = {id: res.id, nombre: res.data().nombre}
           this.datos_archivos.push(archivo)
         })
         this.tabla_loading = false
         return resDB
       } catch (error) {
-        this.datos_archivos = datos
-        console.log(error)
-        this.tabla_loading = false
-      }
-    },
-    async getArchivo(id) {
-      try {
-        const resDB = await firebaseDB.collection('Archivo').get()
-        this.editar_archivo_nombre = []
-        resDB.forEach(res => {
-          console.log("res: ", res.data())
-          const archivo = {id: res.id, nombre: res.data().nombre}
-          this.datos_archivos.push(archivo)
-        })
-        this.tabla_loading = false
-        return resDB
-      } catch (error) {
-        this.datos_archivos = datos
         console.log(error)
         this.tabla_loading = false
       }
@@ -183,14 +163,14 @@ export default {
           type: 'info',
           textColor: 'grey-10',
           multiLine: true,
-          message: `Se agregó el nuevo archivo ${this.nuevo_archivo_nombre}`,
+          message: `Se agregó el nuevo archivo "${this.nuevo_archivo_nombre}"`,
           timeout: 2000
         })
       } catch (error) {
         console.log(error)
       } finally {
         this.nuevo_archivo_nombre = undefined
-        this.getArchivos()
+        await this.getArchivos()
       }
     },
     async saveArchivo() {
@@ -201,7 +181,7 @@ export default {
           type: 'info',
           textColor: 'grey-10',
           multiLine: true,
-          message: `Se modifico el nuevo archivo ${this.nuevo_archivo_nombre}`,
+          message: `Se modifico el archivo "${this.editar_archivo_nombre}"`,
           timeout: 2000
         })
       } catch (error) {
@@ -209,7 +189,7 @@ export default {
       } finally {
         this.editar_archivo_nombre = undefined
         this.editar_archivo_id = undefined
-        this.getArchivos()
+        await this.getArchivos()
       }
     },
     async deleteArchivo() {
@@ -218,7 +198,7 @@ export default {
         this.$q.notify({
           type: 'negative',
           multiLine: true,
-          message: `Se eliminó el archivo ${this.eliminar_archivo_nombre}`,
+          message: `Se eliminó el archivo "${this.eliminar_archivo_nombre}"`,
           timeout: 2000
         })
       } catch (error) {
@@ -226,7 +206,7 @@ export default {
       } finally {
         this.eliminar_archivo_nombre = undefined
         this.eliminar_archivo_id = undefined
-        this.getArchivos()
+        await this.getArchivos()
       }
     },
     cancelar_guardado() {
@@ -263,7 +243,7 @@ export default {
       if (this.editar_archivo_nombre) {
         let existe = false;
         for (let item of this.datos_archivos) {
-          if (item.nombre === this.editar_archivo_nombre && item.nombre != this.editar_archivo_id) {
+          if (item.nombre === this.editar_archivo_nombre && item.nombre !== this.editar_archivo_id) {
             existe = true
             console.log("existe")
           }
@@ -277,7 +257,7 @@ export default {
       let mensaje = ""
       for (let item of this.datos_archivos) {
         if (item.nombre === this.nuevo_archivo_nombre) {
-          mensaje += "Ya existe un arhivo con ese nombre. "
+          mensaje += "Ya existe un archivo con ese nombre. "
           console.log("existe")
         }
       }

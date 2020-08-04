@@ -34,7 +34,7 @@
           </q-item>
           <q-item to="registros" clickable v-ripple>
             <q-item-section avatar>
-              <q-icon name="inbox"/>
+              <q-icon name="mdi-file-edit"/>
             </q-item-section>
 
             <q-item-section>
@@ -46,16 +46,16 @@
 
           <q-item to="archivos" clickable v-ripple>
             <q-item-section avatar>
-              <q-icon name="drafts"/>
+              <q-icon name="mdi-semantic-web"/>
             </q-item-section>
             <q-item-section>
               Archivos
             </q-item-section>
           </q-item>
 
-          <q-item clickable v-ripple>
+          <q-item to="fondos" clickable v-ripple>
             <q-item-section avatar>
-              <q-icon name="mdi-file"/>
+              <q-icon name="inbox"/>
             </q-item-section>
 
             <q-item-section>
@@ -63,7 +63,7 @@
             </q-item-section>
           </q-item>
 
-          <q-item clickable v-ripple>
+          <q-item to="lugares" clickable v-ripple>
             <q-item-section avatar>
               <q-icon name="place"/>
             </q-item-section>
@@ -73,9 +73,9 @@
             </q-item-section>
           </q-item>
 
-          <q-item clickable v-ripple>
+          <q-item to="ramos" clickable v-ripple>
             <q-item-section avatar>
-              <q-icon name="mdi-git"/>
+              <q-icon name="mdi-source-repository"/>
             </q-item-section>
 
             <q-item-section>
