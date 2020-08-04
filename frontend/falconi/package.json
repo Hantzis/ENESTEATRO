@@ -5,12 +5,13 @@
   "productName": "Los Falconi",
   "cordovaId": "mx.unam.humanidades.udir.novohispano",
   "capacitorId": "",
-  "author": "César Benjamín García Martínez cesar.benjamin@enesmorelia.unam.mx",
+  "author": "César Benjamín García Martínez <cesar.benjamin@enesmorelia.unam.mx>",
   "private": true,
   "scripts": {
     "lint": "eslint --ext .js,.vue ./",
     "test": "echo \"No test specified\" && exit 0",
-    "run": "quasar dev --modern"
+    "run": "quasar dev --modern",
+    "build-pwa": "quasar build --modern -m pwa"
   },
   "dependencies": {
     "@quasar/extras": "^1.0.0",
@@ -21,7 +22,7 @@
     "vuefire": "^2.2.2"
   },
   "devDependencies": {
-    "@quasar/app": "^1.0.0",
+    "@quasar/app": "^1.9.6",
     "babel-eslint": "^10.0.1",
     "eslint": "^6.8.0",
     "eslint-config-prettier": "^6.9.0",
