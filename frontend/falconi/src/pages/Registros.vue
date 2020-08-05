@@ -3,7 +3,7 @@
     <div class="row">
       <q-breadcrumbs>
         <q-breadcrumbs-el icon="home"/>
-        <q-breadcrumbs-el label="Registros" icon="mdi-semantic-web"/>
+        <q-breadcrumbs-el label="Registros" icon="mdi-file-edit"/>
       </q-breadcrumbs>
     </div>
     <div class="row" style="padding-bottom: 10px;">
@@ -54,14 +54,14 @@
         <q-card-section style="max-height: 50vh" class="scroll">
           <div class="row">
             <div class="col">
-              <q-select clearable name="archivo" label="Archivo" :options="archivos" v-model="nuevo_registro_archivo" />
-              <q-select clearable name="fondo" label="Fondo" :options="fondos" v-model="nuevo_registro_fondo" />
-              <q-input clearable name="libro" label="Libro" v-model="nuevo_registro_libro" type="number" min="1" />
-              <q-input clearable name="foja" label="Foja" v-model="nuevo_registro_foja" />
-              <q-input clearable name="caja" label="Caja" v-model="nuevo_registro_caja" />
-              <q-input clearable name="expediente" label="Expediente" v-model="nuevo_registro_expediente" />
-              <q-select clearable name="años" label="Años" v-model="nuevo_registro_anos" use-input use-chips multiple hide-dropdown-icon input-debounce="0" new-value-mode="add-unique" />
-              <q-select clearable name="lugar" label="Lugar" :options="lugares" v-model="nuevo_registro_lugar" />
+              <q-select clearable name="archivo" label="Archivo" :options="archivos" v-model="registro_archivo" />
+              <q-select clearable name="fondo" label="Fondo" :options="fondos" v-model="registro_fondo" />
+              <q-input clearable name="libro" label="Libro" v-model="registro_libro" type="number" min="1" />
+              <q-input clearable name="foja" label="Foja" v-model="registro_foja" />
+              <q-input clearable name="caja" label="Caja" v-model="registro_caja" />
+              <q-input clearable name="expediente" label="Expediente" v-model="registro_expediente" />
+              <q-select clearable name="años" label="Años" v-model="registro_anos" use-input use-chips multiple hide-dropdown-icon input-debounce="0" new-value-mode="add-unique" />
+              <q-select clearable name="lugar" label="Lugar" :options="lugares" v-model="registro_lugar" />
               <q-select clearable name="ramo" label="Ramo" :options="ramos" v-model="nuevo_registro_ramo" />
               <q-select clearable name="encabezados" label="Encabezados" v-model="nuevo_registro_encabezados" use-input use-chips multiple hide-dropdown-icon input-debounce="0" new-value-mode="add-unique" />
               <q-select clearable name="notas" label="Notas" v-model="nuevo_registro_notas" use-input use-chips multiple hide-dropdown-icon input-debounce="0" new-value-mode="add-unique" />
@@ -132,14 +132,14 @@ export default {
       dialogo_nuevoregistro: false,
       dialogo_editarregistro: false,
       dialogo_eliminarregistro: false,
-      nuevo_registro_archivo: undefined,
-      nuevo_registro_fondo: undefined,
-      nuevo_registro_libro: undefined,
-      nuevo_registro_foja: undefined,
-      nuevo_registro_caja: undefined,
-      nuevo_registro_expediente: undefined,
-      nuevo_registro_anos: undefined,
-      nuevo_registro_lugar: undefined,
+      registro_archivo: undefined,
+      registro_fondo: undefined,
+      registro_libro: undefined,
+      registro_foja: undefined,
+      registro_caja: undefined,
+      registro_expediente: undefined,
+      registro_anos: undefined,
+      registro_lugar: undefined,
       nuevo_registro_ramo: undefined,
       nuevo_registro_encabezados: undefined,
       nuevo_registro_notas: undefined,
@@ -164,7 +164,6 @@ export default {
         {name: 'notas', align: 'left', label: 'Notas', field: 'notas', sortable: true},
         {name: 'transcripcion', align: 'left', label: 'Transcripción', field: 'transcripcion', sortable: true},
         {name: 'usuario', align: 'left', label: 'Usuario', field: 'usuario', sortable: true},
-
         {name: 'actions', label: '', field: 'actions', align: 'right'},
       ],
       archivos: undefined,
@@ -251,6 +250,19 @@ export default {
           if (res.data().años) {
             years = res.data().años.join(", ")
           }
+          let encabezados = "";
+          if (res.data().encabezados) {
+            let arr_encanezados = []
+            for (let i of res.data().encabezados) {
+              arr_encanezados.push('"' + i + '"')
+            }
+            console.log("enca", arr_encanezados)
+            encabezados = arr_encanezados.join(" / ")
+          }
+          let notas = "";
+          if (res.data().notas) {
+            notas = res.data().notas.join(" / ")
+          }
           const registro = {
             id: res.id,
             archivo: res.data().archivo,
@@ -260,8 +272,8 @@ export default {
             años: years,
             lugar: res.data().lugar,
             ramo: res.data().ramo,
-            encabezados: res.data().encabezados,
-            notas: res.data().notas,
+            encabezados: encabezados,
+            notas: notas,
             transcripcion: res.data().transcripcion,
             usuario: res.data().usuario,
           };
@@ -277,12 +289,20 @@ export default {
     },
     async addRegistro() {
       try {
+
         const data_registros = {}
-        if (this.nuevo_registro_archivo) data_registros['archivo'] = this.nuevo_registro_archivo
-        if (this.nuevo_registro_fondo) data_registros['fondo'] = this.nuevo_registro_fondo
-        if (this.nuevo_registro_libro) data_registros['libro'] = this.nuevo_registro_libro
-        if (this.nuevo_registro_foja) data_registros['foja'] = this.nuevo_registro_foja
-        if (this.nuevo_registro_caja) data_registros['caja'] = this.nuevo_registro_caja
+        if (this.registro_archivo) data_registros['archivo'] = this.registro_archivo
+        if (this.registro_fondo) data_registros['fondo'] = this.registro_fondo
+        if (this.registro_libro) data_registros['libro'] = this.registro_libro
+        if (this.registro_foja) data_registros['foja'] = this.registro_foja
+        if (this.registro_caja) data_registros['caja'] = this.registro_caja
+        if (this.registro_expediente) data_registros['expediente'] = this.registro_expediente
+        if (this.registro_anos) data_registros['años'] = this.registro_anos
+        if (this.registro_lugar) data_registros['lugar'] = this.registro_lugar
+        if (this.nuevo_registro_ramo) data_registros['ramo'] = this.nuevo_registro_ramo
+        if (this.nuevo_registro_encabezados) data_registros['encabezados'] = this.nuevo_registro_encabezados
+        if (this.nuevo_registro_notas) data_registros['notas'] = this.nuevo_registro_notas
+        if (this.nuevo_registro_transcripcion) data_registros['transcripcion'] = this.nuevo_registro_transcripcion
         const resDB = await firebaseDB.collection('Registro').add(data_registros)
         console.log(resDB.id)
         this.$q.notify({
@@ -292,6 +312,8 @@ export default {
           message: `Se agregó el nuevo registro`,
           timeout: 2000
         })
+
+
       } catch (error) {
         console.log(error)
       } finally {
@@ -336,14 +358,14 @@ export default {
       }
     },
     limpiar_campos() {
-      this.nuevo_registro_archivo = undefined
-      this.nuevo_registro_fondo = undefined
-      this.nuevo_registro_libro = undefined
-      this.nuevo_registro_foja = undefined
-      this.nuevo_registro_caja = undefined
-      this.nuevo_registro_expediente = undefined
-      this.nuevo_registro_anos = undefined
-      this.nuevo_registro_lugar = undefined
+      this.registro_archivo = undefined
+      this.registro_fondo = undefined
+      this.registro_libro = undefined
+      this.registro_foja = undefined
+      this.registro_caja = undefined
+      this.registro_expediente = undefined
+      this.registro_anos = undefined
+      this.registro_lugar = undefined
       this.nuevo_registro_ramo = undefined
       this.nuevo_registro_encabezados = undefined
       this.nuevo_registro_notas = undefined
@@ -410,7 +432,7 @@ export default {
   },
   watch: {
     nuevo_registro_anos() {
-      console.log(this.nuevo_registro_anos)
+      console.log(this.registro_anos)
     }
   }
 }

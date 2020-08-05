@@ -132,7 +132,7 @@
     methods: {
       get_gravatar(email, argsize) {
         const size = argsize
-        return 'http://www.gravatar.com/avatar/' + md5(email.trim().toLowerCase(), 'hex') + '.jpg?s=' + size;
+        return 'https://www.gravatar.com/avatar/' + md5(email.trim().toLowerCase(), 'hex') + '.jpg?s=' + size;
       }
     }
   }

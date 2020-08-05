@@ -1,14 +1,24 @@
 <template>
   <q-page class="flex flex-center">
-    <img
-      alt="Quasar logo"
-      src="~assets/quasar-logo-full.svg"
-    >
+    <div class="row">
+      <div class="col">
+        <img alt="Quasar logo" src="~assets/quasar-logo-full.svg">
+      </div>
+    </div>
+    <div class="row">
+      <div class="col">
+        <Login />
+      </div>
+    </div>
+
   </q-page>
 </template>
 
 <script>
+import Login from "components/Login";
+
 export default {
-  name: 'PageIndex'
+  name: 'PageIndex',
+  components: {Login}
 }
 </script>
