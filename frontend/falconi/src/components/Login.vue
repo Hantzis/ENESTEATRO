@@ -11,13 +11,11 @@
               <q-input class="full-width" name="password" v-model="password" type="password" label="Contraseña"/>
             </div>
             <br/>
-
             <div class="row">
               <div class="col" align="right">
                 <q-btn color="green" label="Ingresar" class="full-width"/>
               </div>
             </div>
-
           </q-form>
         </div>
       </div>
