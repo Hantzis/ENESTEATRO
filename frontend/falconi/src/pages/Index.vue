@@ -1,8 +1,8 @@
 <template>
   <q-page class="flex flex-center">
     <div class="row">
-      <div class="col">
-        <img alt="Quasar logo" src="~assets/quasar-logo-full.svg">
+      <div class="col q-px-md">
+        <img alt="UDIR" src="~assets/logo_udir.png" width="256">
       </div>
     </div>
     <div class="row">
