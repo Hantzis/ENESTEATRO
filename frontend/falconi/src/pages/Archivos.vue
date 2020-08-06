@@ -224,11 +224,8 @@ export default {
       this.archivo_nombre = undefined
       this.archivo_id = undefined
     },
-    addArchivoDialog(props) {
-      console.log(props)
+    addArchivoDialog() {
       this.dialogo_nuevoarchivo = true
-      this.archivo_nombre = props.row.nombre
-      this.archivo_id = props.row.id
     },
     editArchivoDialog(props) {
       console.log(props)
