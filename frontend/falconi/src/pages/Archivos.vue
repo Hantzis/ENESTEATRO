@@ -45,11 +45,13 @@
     </div>
 
     <q-dialog v-model="dialogo_nuevoarchivo" persistent>
-      <q-card>
-        <q-card-section class="">
-          <div class="row">
-            <p>Agregar nuevo archivo</p>
-          </div>
+      <q-card style="width: 500px; max-width: 80vw;">
+        <q-card-section class="row items-center">
+          <q-avatar icon="mdi-plus" color="green" text-color="white"/>
+          <q-toolbar-title>Agregar nuevo archivo</q-toolbar-title>
+        </q-card-section>
+        <q-separator/>
+        <q-card-section>
           <div class="row">
             <div class="col">
               <q-input name="nombre" label="Nombre del archivo" v-model="archivo_nombre"
@@ -57,20 +59,23 @@
             </div>
           </div>
         </q-card-section>
+        <q-separator/>
         <q-card-actions align="right">
           <q-btn flat label="Cancelar" color="secondary" v-close-popup @click="cancelar_guardado()"/>
-          <q-btn flat label="Agregar nuevo" color="primary" v-close-popup
+          <q-btn flat label="Agregar" color="primary" v-close-popup
                  :disable="archivonuevo_invalido || !this.archivo_nombre"
                  @click="addArchivo()"/>
         </q-card-actions>
       </q-card>
     </q-dialog>
     <q-dialog v-model="dialogo_editararchivo" persistent>
-      <q-card>
-        <q-card-section class="">
-          <div class="row">
-            <p>Editar archivo</p>
-          </div>
+      <q-card style="width: 500px; max-width: 80vw;">
+        <q-card-section class="row items-center">
+          <q-avatar icon="edit" color="primary" text-color="white"/>
+          <q-toolbar-title>Editar archivo</q-toolbar-title>
+        </q-card-section>
+        <q-separator/>
+        <q-card-section>
           <div class="row">
             <div class="col">
               <q-input name="nombre" label="Nombre del archivo" v-model="archivo_nombre"
@@ -78,17 +83,23 @@
             </div>
           </div>
         </q-card-section>
+        <q-separator/>
         <q-card-actions align="right">
           <q-btn flat label="Cancelar" color="secondary" v-close-popup @click="cancelar_guardado()"/>
-          <q-btn flat label="Guardar edición" color="primary" v-close-popup
+          <q-btn flat label="Guardar" color="primary" v-close-popup
                  :disable="archivomodificado_invalido || !this.archivo_nombre"
                  @click="saveArchivo()"/>
         </q-card-actions>
       </q-card>
     </q-dialog>
     <q-dialog v-model="dialogo_eliminararchivo" persistent>
-      <q-card>
-        <q-card-section class="">
+      <q-card style="width: 500px; max-width: 80vw;">
+        <q-card-section class="row items-center">
+          <q-avatar icon="delete" color="red" text-color="white"/>
+          <q-toolbar-title>Eliminar archivo</q-toolbar-title>
+        </q-card-section>
+        <q-separator/>
+        <q-card-section>
           <div class="row">
             <p>¿Está seguro de eliminar este archivo?</p>
           </div>
@@ -98,6 +109,7 @@
             </div>
           </div>
         </q-card-section>
+        <q-separator/>
         <q-card-actions align="right">
           <q-btn flat label="Cancelar" color="secondary" v-close-popup @click="cancelar_guardado()"/>
           <q-btn flat label="Eliminar" color="red" v-close-popup
@@ -244,8 +256,7 @@ export default {
       } else {
         return false
       }
-    }
-    ,
+    },
     archivomodificado_invalido() {
       if (this.archivo_nombre) {
         let existe = false;
@@ -258,8 +269,7 @@ export default {
       } else {
         return false
       }
-    }
-    ,
+    },
     mensaje_error() {
       let mensaje = ""
       for (let item of Object.values(this.datos_archivos)) {
