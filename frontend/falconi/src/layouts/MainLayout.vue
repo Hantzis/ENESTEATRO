@@ -311,10 +311,11 @@ export default {
           }, 100)
         }
       }).catch(error => {
+        console.log(error)
         if (error.code === "auth/invalid-email") {
           this.login_message = "La dirección email no tiene formato correcto."
         }
-        if (error.code === "auth/user-not-found") {
+        if (error.code === "auth/user-not-found" || error.code === "auth/wrong-password") {
           this.login_message = "Usuario o contraeña incorrectos."
         }
       })
