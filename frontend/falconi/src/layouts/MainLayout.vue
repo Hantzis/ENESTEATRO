@@ -7,10 +7,22 @@
         <q-toolbar-title>
           Los Falconi
         </q-toolbar-title>
-        {{ todaysDate }}&nbsp;&nbsp;&nbsp;
-        <q-btn dense round flat @click="open_dialog_info = true" icon="info"></q-btn>
-        <q-btn dense round flat @click="open_dialog_login = true" icon="login"></q-btn>
-        <q-btn dense round flat @click="open_dialog_logout = true" icon="logout"></q-btn>
+        <!-- {{ todaysDate }}&nbsp;&nbsp;&nbsp; -->
+        <q-btn dense round flat @click="open_dialog_info = true" icon="info">
+          <q-tooltip content-class="bg-amber text-black shadow-4" self="bottom right" anchor="center left" content-style="font-size: 16px">
+            Info
+          </q-tooltip>
+        </q-btn>
+        <q-btn v-if="!es_usuario" dense round flat @click="open_dialog_login = true" icon="login">
+          <q-tooltip content-class="bg-amber text-black shadow-4" self="bottom right" anchor="center left" content-style="font-size: 16px">
+            Iniciar sesión
+          </q-tooltip>
+        </q-btn>
+        <q-btn v-if="es_usuario" dense round flat @click="open_dialog_logout = true" icon="logout">
+          <q-tooltip content-class="bg-amber text-black shadow-4" self="bottom right" anchor="center left" content-style="font-size: 16px">
+            Cerrar sesión
+          </q-tooltip>
+        </q-btn>
       </q-toolbar>
       <!-- <q-tabs align="right">
         <q-route-tab to="" label="Uno"/>
@@ -168,21 +180,28 @@
                 <div class="col" style="min-width: 256px;">
                   <q-form>
                     <div class="row">
-                      <q-input class="full-width" name="email" v-model="login_email" label="Dirección de correo"/>
+                      <q-input class="full-width" name="email"
+                               :rules="[val => !!val || 'Falta dirección de correo', isValidEmail]"
+                               v-model="login_email" label="Dirección de correo"/>
                     </div>
                     <div class="row">
-                      <q-input class="full-width" name="password" v-model="login_password" type="password" label="Contraseña"/>
+                      <q-input class="full-width" name="password" v-model="login_password" type="password"
+                               label="Contraseña"/>
                     </div>
                     <br/>
                     <div class="row">
                       <div class="col" align="right">
-                        <q-btn :disabled="!login_email || !login_password" color="green" label="Ingresar" class="full-width"/>
+                        <q-btn :disabled="!login_email || !login_password" @click="login()" color="green"
+                               label="Ingresar" class="full-width"/>
                       </div>
+                    </div>
+                    <div class="row">
+                      <p style="margin-bottom: 0px; margin-top: 10px;">{{ login_message }}</p>
                     </div>
                   </q-form>
                 </div>
               </div>
-              <div class="row q-pt-sm">
+              <div class="row">
                 <div class="col q-pt-sm">
                   <div class="row q-py-sm">
                     <q-separator style="border-top: 1px dashed; background: white !important;;" color="green"/>
@@ -190,7 +209,6 @@
                   <div class="row">
                     <div class="col" align="right">
                       <p style="margin: 0"><a href="">Olvidé mi contraseña</a></p>
-                      <p style="margin: 0"><a href="" class="primary">Crear cuenta</a></p>
                     </div>
                   </div>
                 </div>
@@ -201,6 +219,38 @@
         <q-separator/>
         <q-card-actions align="right">
           <q-btn label="Cancelar" color="grey-10" v-close-popup/>
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+    <q-dialog v-model="open_dialog_logout">
+      <q-card>
+        <q-card-section class="row items-center">
+          <q-avatar icon="mdi-key-variant" color="red" text-color="white"/>
+          <q-toolbar-title>Cerrar sesión</q-toolbar-title>
+        </q-card-section>
+        <q-separator/>
+        <q-card-section class="row items-center">
+          <div class="row">
+            <div class="col">
+              <div class="row">
+                <div class="col" style="min-width: 256px;">
+                    <div class="row">
+                      <div class="col" align="right">
+                        <q-btn @click="logout()" color="black"
+                               label="Salir" class="full-width"/>
+                      </div>
+                    </div>
+                    <div class="row">
+                      <p style="margin-bottom: 0px; margin-top: 10px;">{{ login_message }}</p>
+                    </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </q-card-section>
+        <q-separator/>
+        <q-card-actions align="right">
+          <q-btn label="Cancelar" color="black" v-close-popup/>
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -223,6 +273,8 @@ export default {
       open_dialog_logout: false,
       login_email: undefined,
       login_password: undefined,
+      login_message: "",
+      es_usuario: false
     }
   },
   computed: {
@@ -231,19 +283,53 @@ export default {
       return date.formatDate(timeStamp, 'YYYY-MM-DD')
     }
   },
+  watch: {
+    login_email() {
+      this.login_message = ""
+    }
+  },
   methods: {
+    isValidEmail(val) {
+      const emailPattern = /^(?=[a-zA-Z0-9@.%+-]{6,254}$)[a-zA-Z0-9.%+-]{1,64}@(?:[a-zA-Z0-9-]{1,63}\.){1,8}[a-zA-Z]{2,63}$/;
+      return emailPattern.test(val) || 'La dirección email no tiene formato correcto.';
+    },
     get_gravatar(email, argsize) {
       const size = argsize
       return 'https://www.gravatar.com/avatar/' + md5(email.trim().toLowerCase(), 'hex') + '.jpg?s=' + size;
     },
     login() {
-       firebase.auth().signInWithEmailAndPassword(this.login_email, this.login_password).then(response => {
-         console.log(response)
-         console.log(response.data())
-       })
+      firebase.auth().signInWithEmailAndPassword(this.login_email, this.login_password).then(response => {
+        console.log(response)
+        if (response.operationType === "signIn") {
+          this.login_message = "Bienvenido."
+          setTimeout(() => {
+            this.open_dialog_login = false
+            this.login_message = ""
+            this.es_usuario = true
+            this.login_email = undefined
+            this.login_password = undefined
+          }, 100)
+        }
+      }).catch(error => {
+        if (error.code === "auth/invalid-email") {
+          this.login_message = "La dirección email no tiene formato correcto."
+        }
+        if (error.code === "auth/user-not-found") {
+          this.login_message = "Usuario o contraeña incorrectos."
+        }
+      })
     },
     logout() {
-      alert("logout")
+      firebase.auth().signOut().then(response => {
+        this.login_message = "Adios."
+        setTimeout(() => {
+            this.open_dialog_logout = false
+            this.login_message = ""
+            this.es_usuario = false
+          }, 100)
+      }).catch(error => {
+        console.log(error)
+      })
     },
   }
 }
