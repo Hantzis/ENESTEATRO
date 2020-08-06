@@ -11,7 +11,7 @@
         <q-btn color="primary" style="margin-right: 12px;" @click="getArchivos()">
           <q-icon left dense size="2em" name="mdi-sync" style="margin-right: -10px; margin-left: -10px;"/>
         </q-btn>
-        <q-btn color="green" @click="dialogo_nuevoarchivo = true">
+        <q-btn color="green" @click="addArchivoDialog()">
           <q-icon left size="2em" name="mdi-plus"/>
           <div>Nuevo Archivo</div>
         </q-btn>
@@ -21,10 +21,9 @@
       <div class="col">
         <q-table
           title="Archivos"
-          :data.sync="datos_archivos"
+          :data.sync="Object.values(datos_archivos)"
           :columns="columns"
           row-key="id"
-          :grid1="$q.screen.xs"
           :loading="tabla_loading"
           :filter="filter"
         >
@@ -53,7 +52,7 @@
           </div>
           <div class="row">
             <div class="col">
-              <q-input name="nombre" label="Nombre del archivo" v-model="nuevo_archivo_nombre"
+              <q-input name="nombre" label="Nombre del archivo" v-model="archivo_nombre"
                        :error-message="mensaje_error" :error="archivonuevo_invalido"/>
             </div>
           </div>
@@ -61,7 +60,7 @@
         <q-card-actions align="right">
           <q-btn flat label="Cancelar" color="secondary" v-close-popup @click="cancelar_guardado()"/>
           <q-btn flat label="Agregar nuevo" color="primary" v-close-popup
-                 :disable="archivonuevo_invalido || !this.nuevo_archivo_nombre"
+                 :disable="archivonuevo_invalido || !this.archivo_nombre"
                  @click="addArchivo()"/>
         </q-card-actions>
       </q-card>
@@ -74,15 +73,15 @@
           </div>
           <div class="row">
             <div class="col">
-              <q-input name="nombre" label="Nombre del archivo" v-model="editar_archivo_nombre"
-                       :error-message="mensaje_error" :error="archivonuevo_invalido"/>
+              <q-input name="nombre" label="Nombre del archivo" v-model="archivo_nombre"
+                       :error-message="mensaje_error" :error="archivomodificado_invalido"/>
             </div>
           </div>
         </q-card-section>
         <q-card-actions align="right">
           <q-btn flat label="Cancelar" color="secondary" v-close-popup @click="cancelar_guardado()"/>
           <q-btn flat label="Guardar edición" color="primary" v-close-popup
-                 :disable="archivomodificado_invalido || !this.editar_archivo_nombre"
+                 :disable="archivomodificado_invalido || !this.archivo_nombre"
                  @click="saveArchivo()"/>
         </q-card-actions>
       </q-card>
@@ -95,8 +94,7 @@
           </div>
           <div class="row">
             <div class="col">
-              <q-input readonly name="nombre" label="Nombre del archivo" v-model="eliminar_archivo_nombre"
-                       :error-message="mensaje_error" :error="archivonuevo_invalido"/>
+              <q-input readonly name="nombre" label="Nombre del archivo" v-model="archivo_nombre" />
             </div>
           </div>
         </q-card-section>
@@ -122,11 +120,8 @@ export default {
       dialogo_nuevoarchivo: false,
       dialogo_editararchivo: false,
       dialogo_eliminararchivo: false,
-      nuevo_archivo_nombre: undefined,
-      editar_archivo_nombre: undefined,
-      editar_archivo_id: undefined,
-      eliminar_archivo_nombre: undefined,
-      eliminar_archivo_id: undefined,
+      archivo_nombre: undefined,
+      archivo_nombre_id: undefined,
       columns: [
         {name: 'nombre', align: 'left', label: 'Nombre de Archivo', field: 'nombre', sortable: true},
         {name: 'actions', label: '', field: 'actions', align: 'right'},
@@ -140,120 +135,135 @@ export default {
     this.getArchivos()
   },
   methods: {
-    async getArchivos() {
-      try {
-        const resDB = await firebaseDB.collection('Archivo').get()
-        this.datos_archivos = []
-        resDB.forEach(res => {
-          const archivo = {id: res.id, nombre: res.data().nombre}
-          this.datos_archivos.push(archivo)
+    getArchivos() {
+      this.tabla_loading = true
+      firebaseDB.collection('Archivo').get().then(response => {
+        this.datos_archivos = {}
+        response.forEach(res => {
+          this.datos_archivos[res.id] = {id: res.id, nombre: res.data().nombre}
         })
-        this.tabla_loading = false
-        return resDB
-      } catch (error) {
+      }).catch(error => {
         console.log(error)
+      }).finally(() => {
         this.tabla_loading = false
-      }
+        // console.log("DATOS ARCHIVOS: ", this.datos_archivos)
+      })
     },
-    async addArchivo() {
-      try {
-        const resDB = await firebaseDB.collection('Archivo').add({nombre: this.nuevo_archivo_nombre})
+    addArchivo() {
+      this.tabla_loading = true
+      firebaseDB.collection('Archivo').add({nombre: this.archivo_nombre}).then(response => {
+        console.log(response)
+        console.log(response.id)
+        this.datos_archivos[response.id] = {id:response.id, nombre: this.archivo_nombre}
         this.$q.notify({
           type: 'info',
           textColor: 'grey-10',
           multiLine: true,
-          message: `Se agregó el nuevo archivo "${this.nuevo_archivo_nombre}"`,
+          message: `Se agregó el nuevo archivo "${this.archivo_nombre}"`,
           timeout: 2000
         })
-      } catch (error) {
+      }).catch(error => {
         console.log(error)
-      } finally {
-        this.nuevo_archivo_nombre = undefined
-        await this.getArchivos()
-      }
+      }).finally(() => {
+        this.archivo_nombre = undefined
+        this.archivo_id = undefined
+        this.tabla_loading = false
+      })
     },
-    async saveArchivo() {
-      try {
-        await firebaseDB.collection('Archivo').doc(
-          this.editar_archivo_id).update({nombre: this.editar_archivo_nombre})
+    saveArchivo() {
+      this.tabla_loading = true
+      firebaseDB.collection('Archivo').doc(this.archivo_id)
+        .update({nombre: this.archivo_nombre}).then(() => {
+        this.datos_archivos[this.archivo_id] = {id: this.archivo_id, nombre: this.archivo_nombre}
         this.$q.notify({
           type: 'info',
           textColor: 'grey-10',
           multiLine: true,
-          message: `Se modifico el archivo "${this.editar_archivo_nombre}"`,
+          message: `Se modifico el archivo "${this.archivo_nombre}"`,
           timeout: 2000
         })
-      } catch (error) {
+      }).catch(error => {
         console.log(error)
-      } finally {
-        this.editar_archivo_nombre = undefined
-        this.editar_archivo_id = undefined
-        await this.getArchivos()
-      }
+      }).finally(() => {
+        this.archivo_nombre = undefined
+        this.archivo_id = undefined
+        this.tabla_loading = false
+      })
     },
-    async deleteArchivo() {
-      try {
-        await firebaseDB.collection('Archivo').doc(this.eliminar_archivo_id).delete()
+    deleteArchivo() {
+      this.tabla_loading = true
+      firebaseDB.collection('Archivo').doc(this.archivo_id).delete().then(() => {
+        delete this.datos_archivos[this.archivo_id]
         this.$q.notify({
           type: 'negative',
           multiLine: true,
-          message: `Se eliminó el archivo "${this.eliminar_archivo_nombre}"`,
+          message: `Se eliminó el archivo "${this.archivo_nombre}"`,
           timeout: 2000
         })
-      } catch (error) {
+      }).catch(error => {
         console.log(error)
-      } finally {
-        this.eliminar_archivo_nombre = undefined
-        this.eliminar_archivo_id = undefined
-        await this.getArchivos()
-      }
+      }).finally(() => {
+        this.archivo_nombre = undefined
+        this.archivo_id = undefined
+        this.tabla_loading = false
+      })
     },
     cancelar_guardado() {
-      this.nuevo_archivo_nombre = undefined
-      this.editar_archivo_nombre = undefined
+      this.archivo_nombre = undefined
+      this.archivo_id = undefined
+    },
+    addArchivoDialog(props) {
+      console.log(props)
+      this.dialogo_nuevoarchivo = true
+      this.archivo_nombre = props.row.nombre
+      this.archivo_id = props.row.id
     },
     editArchivoDialog(props) {
+      console.log(props)
       this.dialogo_editararchivo = true
-      this.editar_archivo_nombre = props.row.nombre
-      this.editar_archivo_id = props.row.id
+      this.archivo_nombre = props.row.nombre
+      this.archivo_id = props.row.id
     },
     deleteArchivoDialog(props) {
+      console.log(props)
       this.dialogo_eliminararchivo = true
-      this.eliminar_archivo_nombre = props.row.nombre
-      this.eliminar_archivo_id = props.row.id
+      this.archivo_nombre = props.row.nombre
+      this.archivo_id = props.row.id
     },
   },
   computed: {
     archivonuevo_invalido() {
-      if (this.nuevo_archivo_nombre) {
+      if (this.archivo_nombre) {
         let existe = false;
-        for (let item of this.datos_archivos) {
-          if (item.nombre === this.nuevo_archivo_nombre) {
+        for (let item of Object.values(this.datos_archivos)) {
+          if (item.nombre === this.archivo_nombre) {
             existe = true
           }
         }
-        return this.nuevo_archivo_nombre.length < 1 || existe
+        return this.archivo_nombre.length < 1 || existe
       } else {
         return false
       }
-    },
+    }
+    ,
     archivomodificado_invalido() {
-      if (this.editar_archivo_nombre) {
+      if (this.archivo_nombre) {
         let existe = false;
-        for (let item of this.datos_archivos) {
-          if (item.nombre === this.editar_archivo_nombre && item.nombre !== this.editar_archivo_id) {
+        for (let item of Object.values(this.datos_archivos)) {
+          if (item.nombre === this.archivo_nombre && item.id !== this.archivo_id) {
             existe = true
           }
         }
-        return this.editar_archivo_nombre.length < 1 || existe
+        return this.archivo_nombre.length < 1 || existe
       } else {
         return false
       }
-    },
+    }
+    ,
     mensaje_error() {
       let mensaje = ""
-      for (let item of this.datos_archivos) {
-        if (item.nombre === this.nuevo_archivo_nombre) {
+      for (let item of Object.values(this.datos_archivos)) {
+        if (item.nombre === this.archivo_nombre) {
           mensaje += "Ya existe un archivo con ese nombre. "
         }
       }
