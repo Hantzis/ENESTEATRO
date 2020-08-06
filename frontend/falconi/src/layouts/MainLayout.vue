@@ -171,12 +171,12 @@
                       <q-input class="full-width" name="email" v-model="login_email" label="Dirección de correo"/>
                     </div>
                     <div class="row">
-                      <q-input class="full-width" name="password" v-model="password" type="password" label="Contraseña"/>
+                      <q-input class="full-width" name="password" v-model="login_password" type="password" label="Contraseña"/>
                     </div>
                     <br/>
                     <div class="row">
                       <div class="col" align="right">
-                        <q-btn :disabled="!login_email || !password" color="green" label="Ingresar" class="full-width"/>
+                        <q-btn :disabled="!login_email || !login_password" color="green" label="Ingresar" class="full-width"/>
                       </div>
                     </div>
                   </q-form>
@@ -212,6 +212,7 @@
 <script>
 import {date} from 'quasar'
 import md5 from 'crypto-md5';
+import firebase from 'firebase'
 
 export default {
   data() {
@@ -221,7 +222,7 @@ export default {
       open_dialog_login: false,
       open_dialog_logout: false,
       login_email: undefined,
-      password: undefined,
+      login_password: undefined,
     }
   },
   computed: {
@@ -236,7 +237,10 @@ export default {
       return 'https://www.gravatar.com/avatar/' + md5(email.trim().toLowerCase(), 'hex') + '.jpg?s=' + size;
     },
     login() {
-      alert("login")
+       firebase.auth().signInWithEmailAndPassword(this.login_email, this.login_password).then(response => {
+         console.log(response)
+         console.log(response.data())
+       })
     },
     logout() {
       alert("logout")

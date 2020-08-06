@@ -132,8 +132,6 @@ export default {
         {name: 'actions', label: '', field: 'actions', align: 'right'},
       ],
       datos_lugares: [],
-      noti: () => {
-      },
     }
   },
   mounted() {
@@ -158,7 +156,6 @@ export default {
     async addLugar() {
       try {
         const resDB = await firebaseDB.collection('Lugar').add({nombre: this.nuevo_lugar_nombre})
-        console.log(resDB.id)
         this.$q.notify({
           type: 'info',
           textColor: 'grey-10',
@@ -231,7 +228,6 @@ export default {
         for (let item of this.datos_lugares) {
           if (item.nombre === this.nuevo_lugar_nombre) {
             existe = true
-            console.log("existe")
           }
         }
         return this.nuevo_lugar_nombre.length < 1 || existe
@@ -245,7 +241,6 @@ export default {
         for (let item of this.datos_lugares) {
           if (item.nombre === this.editar_lugar_nombre && item.nombre !== this.editar_lugar_id) {
             existe = true
-            console.log("existe")
           }
         }
         return this.editar_lugar_nombre.length < 1 || existe
@@ -258,7 +253,6 @@ export default {
       for (let item of this.datos_lugares) {
         if (item.nombre === this.nuevo_lugar_nombre) {
           mensaje += "Ya existe un lugar con ese nombre. "
-          console.log("existe")
         }
       }
       return mensaje

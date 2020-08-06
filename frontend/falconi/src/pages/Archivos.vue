@@ -158,7 +158,6 @@ export default {
     async addArchivo() {
       try {
         const resDB = await firebaseDB.collection('Archivo').add({nombre: this.nuevo_archivo_nombre})
-        console.log(resDB.id)
         this.$q.notify({
           type: 'info',
           textColor: 'grey-10',
@@ -231,7 +230,6 @@ export default {
         for (let item of this.datos_archivos) {
           if (item.nombre === this.nuevo_archivo_nombre) {
             existe = true
-            console.log("existe")
           }
         }
         return this.nuevo_archivo_nombre.length < 1 || existe
@@ -245,7 +243,6 @@ export default {
         for (let item of this.datos_archivos) {
           if (item.nombre === this.editar_archivo_nombre && item.nombre !== this.editar_archivo_id) {
             existe = true
-            console.log("existe")
           }
         }
         return this.editar_archivo_nombre.length < 1 || existe
@@ -258,7 +255,6 @@ export default {
       for (let item of this.datos_archivos) {
         if (item.nombre === this.nuevo_archivo_nombre) {
           mensaje += "Ya existe un archivo con ese nombre. "
-          console.log("existe")
         }
       }
       return mensaje

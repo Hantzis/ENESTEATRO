@@ -7,7 +7,6 @@
     </div>
     <div class="row">
       <div class="col">
-        <Login />
       </div>
     </div>
 
@@ -15,10 +14,8 @@
 </template>
 
 <script>
-import Login from "components/Login";
 
 export default {
   name: 'PageIndex',
-  components: {Login}
 }
 </script>

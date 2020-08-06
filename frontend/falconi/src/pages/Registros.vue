@@ -48,27 +48,35 @@
 
     <q-dialog v-model="dialogo_nuevoregistro" persistent>
       <q-card style="width: 700px; max-width: 80vw;">
-        <q-card-section>
-          <div class="text-h6">Agregar nuevo registro</div>
+        <q-card-section class="row items-center">
+          <q-avatar icon="mdi-plus" color="green" text-color="white"/>
+          <q-toolbar-title>Agregar nuevo registro</q-toolbar-title>
         </q-card-section>
+        <q-separator/>
         <q-card-section style="max-height: 50vh" class="scroll">
-          <div class="row">
+          <div class="row q-pt-md">
             <div class="col">
-              <q-select clearable name="archivo" label="Archivo" :options="archivos" v-model="registro_archivo" />
-              <q-select clearable name="fondo" label="Fondo" :options="fondos" v-model="registro_fondo" />
-              <q-input clearable name="libro" label="Libro" v-model="registro_libro" type="number" min="1" />
-              <q-input clearable name="foja" label="Foja" v-model="registro_foja" />
-              <q-input clearable name="caja" label="Caja" v-model="registro_caja" />
-              <q-input clearable name="expediente" label="Expediente" v-model="registro_expediente" />
-              <q-select clearable name="años" label="Años" v-model="registro_anos" use-input use-chips multiple hide-dropdown-icon input-debounce="0" new-value-mode="add-unique" />
-              <q-select clearable name="lugar" label="Lugar" :options="lugares" v-model="registro_lugar" />
-              <q-select clearable name="ramo" label="Ramo" :options="ramos" v-model="nuevo_registro_ramo" />
-              <q-select clearable name="encabezados" label="Encabezados" v-model="nuevo_registro_encabezados" use-input use-chips multiple hide-dropdown-icon input-debounce="0" new-value-mode="add-unique" />
-              <q-select clearable name="notas" label="Notas" v-model="nuevo_registro_notas" use-input use-chips multiple hide-dropdown-icon input-debounce="0" new-value-mode="add-unique" />
-              <q-input clearable name="transcripcion" label="Transcripción" type="textarea" rows="1" autogrow v-model="nuevo_registro_transcripcion" />
+              <q-select clearable name="archivo" label="Archivo" :options="archivos" v-model="registro_archivo"/>
+              <q-select clearable name="fondo" label="Fondo" :options="fondos" v-model="registro_fondo"/>
+              <q-input clearable name="libro" label="Libro" v-model="registro_libro" type="number" min="1"/>
+              <q-input clearable name="foja" label="Foja" v-model="registro_foja"/>
+              <q-input clearable name="caja" label="Caja" v-model="registro_caja"/>
+              <q-input clearable name="expediente" label="Expediente" v-model="registro_expediente"/>
+              <q-select clearable name="años" label="Años" v-model="registro_anos" use-input use-chips multiple
+                        hide-dropdown-icon input-debounce="0" new-value-mode="add-unique"/>
+              <q-select clearable name="lugar" label="Lugar" :options="lugares" v-model="registro_lugar"/>
+              <q-select clearable name="ramo" label="Ramo" :options="ramos" v-model="registro_ramo"/>
+              <q-select clearable name="encabezados" label="Encabezados" v-model="registro_encabezados" use-input
+                        use-chips multiple hide-dropdown-icon input-debounce="0" new-value-mode="add-unique"/>
+              <q-select clearable name="notas" label="Notas" v-model="registro_notas" use-input use-chips multiple
+                        hide-dropdown-icon input-debounce="0" new-value-mode="add-unique"/>
+              <q-input clearable name="transcripcion" label="Transcripción" type="textarea" rows="1" autogrow
+                       v-model="registro_transcripcion"/>
             </div>
           </div>
         </q-card-section>
+        <br/>
+        <q-separator/>
         <q-card-actions align="right">
           <q-btn flat label="Cancelar" color="secondary" v-close-popup @click="limpiar_campos()"/>
           <q-btn flat label="Agregar nuevo" color="primary" v-close-popup
@@ -76,37 +84,88 @@
         </q-card-actions>
       </q-card>
     </q-dialog>
+
     <q-dialog v-model="dialogo_editarregistro" persistent>
-      <q-card>
-        <q-card-section class="">
-          <div class="row">
-            <p>Editar registro</p>
-          </div>
-          <div class="row">
+      <q-card style="width: 700px; max-width: 80vw;">
+        <q-card-section class="row items-center">
+          <q-avatar icon="edit" color="primary" text-color="white"/>
+          <q-toolbar-title>Editar registro</q-toolbar-title>
+        </q-card-section>
+        <q-separator/>
+        <q-card-section style="max-height: 50vh" class="scroll">
+          <div class="row q-pt-md">
             <div class="col">
-              <q-input name="nombre" label="Nombre del registro" v-model="editar_registro_nombre"
-                       :error-message="mensaje_error" :error="registronuevo_invalido"/>
+              <q-select clearable name="archivo" label="Archivo" :options="archivos" v-model="registro_archivo"/>
+              <q-select clearable name="fondo" label="Fondo" :options="fondos" v-model="registro_fondo"/>
+              <q-input clearable name="libro" label="Libro" v-model="registro_libro" type="number" min="1"/>
+              <q-input clearable name="foja" label="Foja" v-model="registro_foja"/>
+              <q-input clearable name="caja" label="Caja" v-model="registro_caja"/>
+              <q-input clearable name="expediente" label="Expediente" v-model="registro_expediente"/>
+              <q-select clearable name="años" label="Años" v-model="registro_anos" use-input use-chips multiple
+                        hide-dropdown-icon input-debounce="0" new-value-mode="add-unique"/>
+              <q-select clearable name="lugar" label="Lugar" :options="lugares" v-model="registro_lugar"/>
+              <q-select clearable name="ramo" label="Ramo" :options="ramos" v-model="registro_ramo"/>
+              <q-select clearable name="encabezados" label="Encabezados" v-model="registro_encabezados" use-input
+                        use-chips multiple hide-dropdown-icon input-debounce="0" new-value-mode="add-unique"/>
+              <q-select clearable name="notas" label="Notas" v-model="registro_notas" use-input use-chips multiple
+                        hide-dropdown-icon input-debounce="0" new-value-mode="add-unique"/>
+              <q-input clearable name="transcripcion" label="Transcripción" type="textarea" rows="1" autogrow
+                       v-model="registro_transcripcion"/>
             </div>
           </div>
         </q-card-section>
+        <br/>
+        <q-separator/>
         <q-card-actions align="right">
           <q-btn flat label="Cancelar" color="secondary" v-close-popup @click="limpiar_campos()"/>
-          <q-btn flat label="Guardar edición" color="primary" v-close-popup
-                 :disable="registromodificado_invalido || !this.editar_registro_nombre"
+          <q-btn flat label="Guardar cambios" color="primary" v-close-popup
                  @click="saveRegistro()"/>
         </q-card-actions>
       </q-card>
     </q-dialog>
+
     <q-dialog v-model="dialogo_eliminarregistro" persistent>
-      <q-card>
-        <q-card-section class="">
+      <q-card style="width: 700px; max-width: 80vw;">
+        <q-card-section class="row items-center">
+          <q-avatar icon="mdi-delete" color="red" text-color="white"/>
+          <q-toolbar-title>Eliminar registro</q-toolbar-title>
+        </q-card-section>
+        <q-separator/>
+        <q-card-section style="max-height: 50vh" class="scroll">
           <div class="row">
-            <p>¿Está seguro de eliminar este registro?</p>
+            <p style="margin: 0">¿Está seguro de eliminar este registro?</p>
           </div>
+        </q-card-section>
+        <q-separator/>
+        <q-card-section style="max-height: 50vh" class="scroll">
           <div class="row">
             <div class="col">
-              <q-input readonly name="nombre" label="Nombre del registro" v-model="eliminar_registro_nombre"
-                       :error-message="mensaje_error" :error="registronuevo_invalido"/>
+              <q-select v-if="registro_archivo" readonly name="archivo" label="Archivo" :options="archivos"
+                        v-model="registro_archivo"/>
+              <q-select v-if="registro_fondo" readonly name="fondo" label="Fondo" :options="fondos"
+                        v-model="registro_fondo"/>
+              <q-input v-if="registro_libro" readonly name="libro" label="Libro" v-model="registro_libro" type="number"
+                       min="1"/>
+              <q-input v-if="registro_foja" readonly name="foja" label="Foja" v-model="registro_foja"/>
+              <q-input v-if="registro_caja" readonly name="caja" label="Caja" v-model="registro_caja"/>
+              <q-input v-if="registro_expediente" readonly name="expediente" label="Expediente"
+                       v-model="registro_expediente"/>
+              <q-select v-if="registro_anos" readonly name="años" label="Años" v-model="registro_anos" use-input
+                        use-chips multiple
+                        hide-dropdown-icon input-debounce="0" new-value-mode="add-unique"/>
+              <q-select v-if="registro_lugar" readonly name="lugar" label="Lugar" :options="lugares"
+                        v-model="registro_lugar"/>
+              <q-select v-if="registro_ramo" readonly name="ramo" label="Ramo" :options="ramos"
+                        v-model="registro_ramo"/>
+              <q-select v-if="registro_encabezados" readonly name="encabezados" label="Encabezados"
+                        v-model="registro_encabezados" use-input
+                        use-chips multiple hide-dropdown-icon input-debounce="0" new-value-mode="add-unique"/>
+              <q-select v-if="registro_notas" readonly name="notas" label="Notas" v-model="registro_notas" use-input
+                        use-chips multiple
+                        hide-dropdown-icon input-debounce="0" new-value-mode="add-unique"/>
+              <q-input v-if="registro_transcripcion" readonly name="transcripcion" label="Transcripción" type="textarea"
+                       rows="1" autogrow
+                       v-model="registro_transcripcion"/>
             </div>
           </div>
         </q-card-section>
@@ -140,12 +199,12 @@ export default {
       registro_expediente: undefined,
       registro_anos: undefined,
       registro_lugar: undefined,
-      nuevo_registro_ramo: undefined,
-      nuevo_registro_encabezados: undefined,
-      nuevo_registro_notas: undefined,
-      nuevo_registro_transcripcion: undefined,
-      nuevo_registro_usuario: undefined,
-      editar_registro_nombre: undefined,
+      registro_ramo: undefined,
+      registro_encabezados: undefined,
+      registro_notas: undefined,
+      registro_transcripcion: undefined,
+      registro_usuario: undefined,
+      registro_nombre: undefined,
       editar_registro: undefined,
       editar_registro_id: undefined,
       eliminar_registro_nombre: undefined,
@@ -171,8 +230,6 @@ export default {
       lugares: undefined,
       ramos: undefined,
       datos_registros: [],
-      noti: () => {
-      },
     }
   },
   mounted() {
@@ -188,7 +245,6 @@ export default {
           datos_archivos.push(archivo)
         });
         this.archivos = datos_archivos
-        console.log("datos_archivos: ", datos_archivos);
       }).catch(error => {
         console.log(error);
         this.archivos = []
@@ -202,7 +258,6 @@ export default {
           datos_fondos.push(fondo)
         });
         this.fondos = datos_fondos
-        console.log("datos_fondos: ", datos_fondos);
       }).catch(error => {
         console.log(error);
         this.fondos = []
@@ -216,7 +271,6 @@ export default {
           datos_lugares.push(lugar)
         });
         this.lugares = datos_lugares
-        console.log("datos_lugares: ", datos_lugares);
       }).catch(error => {
         console.log(error);
         this.lugares = []
@@ -230,7 +284,6 @@ export default {
           datos_ramos.push(lugar)
         });
         this.ramos = datos_ramos
-        console.log("datos_ramos: ", datos_ramos);
       }).catch(error => {
         console.log(error);
         this.ramos = []
@@ -256,7 +309,6 @@ export default {
             for (let i of res.data().encabezados) {
               arr_encanezados.push('"' + i + '"')
             }
-            console.log("enca", arr_encanezados)
             encabezados = arr_encanezados.join(" / ")
           }
           let notas = "";
@@ -269,6 +321,8 @@ export default {
             fondo: res.data().fondo,
             libro: res.data().libro,
             foja: res.data().foja,
+            caja: res.data().caja,
+            expediente: res.data().expediente,
             años: years,
             lugar: res.data().lugar,
             ramo: res.data().ramo,
@@ -277,43 +331,24 @@ export default {
             transcripcion: res.data().transcripcion,
             usuario: res.data().usuario,
           };
-          console.log(res.data().años)
           this.datos_registros.push(registro);
         });
-        console.log("registros: ", this.datos_registros);
         this.tabla_loading = false
       }).catch(error => {
         console.log(error);
         this.tabla_loading = false;
       })
     },
-    async addRegistro() {
+    async addRegistro1() {
       try {
-
-        const data_registros = {}
-        if (this.registro_archivo) data_registros['archivo'] = this.registro_archivo
-        if (this.registro_fondo) data_registros['fondo'] = this.registro_fondo
-        if (this.registro_libro) data_registros['libro'] = this.registro_libro
-        if (this.registro_foja) data_registros['foja'] = this.registro_foja
-        if (this.registro_caja) data_registros['caja'] = this.registro_caja
-        if (this.registro_expediente) data_registros['expediente'] = this.registro_expediente
-        if (this.registro_anos) data_registros['años'] = this.registro_anos
-        if (this.registro_lugar) data_registros['lugar'] = this.registro_lugar
-        if (this.nuevo_registro_ramo) data_registros['ramo'] = this.nuevo_registro_ramo
-        if (this.nuevo_registro_encabezados) data_registros['encabezados'] = this.nuevo_registro_encabezados
-        if (this.nuevo_registro_notas) data_registros['notas'] = this.nuevo_registro_notas
-        if (this.nuevo_registro_transcripcion) data_registros['transcripcion'] = this.nuevo_registro_transcripcion
-        const resDB = await firebaseDB.collection('Registro').add(data_registros)
-        console.log(resDB.id)
+        await firebaseDB.collection('Registro').add(data_registros)
         this.$q.notify({
           type: 'info',
           textColor: 'grey-10',
           multiLine: true,
-          message: `Se agregó el nuevo registro`,
+          message: `Se agregó el nuevo registro con ID ${response.id}`,
           timeout: 2000
         })
-
-
       } catch (error) {
         console.log(error)
       } finally {
@@ -321,41 +356,78 @@ export default {
         await this.getRegistros()
       }
     },
-    async saveRegistro() {
-      try {
-        await firebaseDB.collection('Registro').doc(
-          this.editar_registro_id).update({nombre: this.editar_registro_nombre})
+    addRegistro() {
+      const data_registros = {}
+      if (this.registro_archivo) data_registros['archivo'] = this.registro_archivo
+      if (this.registro_fondo) data_registros['fondo'] = this.registro_fondo
+      if (this.registro_libro) data_registros['libro'] = this.registro_libro
+      if (this.registro_foja) data_registros['foja'] = this.registro_foja
+      if (this.registro_caja) data_registros['caja'] = this.registro_caja
+      if (this.registro_expediente) data_registros['expediente'] = this.registro_expediente
+      if (this.registro_anos) data_registros['años'] = this.registro_anos
+      if (this.registro_lugar) data_registros['lugar'] = this.registro_lugar
+      if (this.registro_ramo) data_registros['ramo'] = this.registro_ramo
+      if (this.registro_encabezados) data_registros['encabezados'] = this.registro_encabezados
+      if (this.registro_notas) data_registros['notas'] = this.registro_notas
+      if (this.registro_transcripcion) data_registros['transcripcion'] = this.registro_transcripcion
+      firebaseDB.collection('Registro').add(data_registros).then(response => {
         this.$q.notify({
           type: 'info',
           textColor: 'grey-10',
           multiLine: true,
-          message: `Se modifico el registro "${this.editar_registro_nombre}"`,
+          message: `Se agregó el nuevo registro con ID ${response.id}`,
           timeout: 2000
         })
-      } catch (error) {
+      }).catch(error => {
         console.log(error)
-      } finally {
-        this.editar_registro_nombre = undefined
-        this.editar_registro_id = undefined
-        await this.getRegistros()
-      }
+      }).finally(() => {
+        this.limpiar_campos()
+        this.getRegistros()
+      })
     },
-    async deleteRegistro() {
-      try {
-        await firebaseDB.collection('Registro').doc(this.eliminar_registro_id).delete()
+    saveRegistro() {
+      const data_registros = {}
+      if (this.registro_archivo) data_registros['archivo'] = this.registro_archivo
+      if (this.registro_fondo) data_registros['fondo'] = this.registro_fondo
+      if (this.registro_libro) data_registros['libro'] = this.registro_libro
+      if (this.registro_foja) data_registros['foja'] = this.registro_foja
+      if (this.registro_caja) data_registros['caja'] = this.registro_caja
+      if (this.registro_expediente) data_registros['expediente'] = this.registro_expediente
+      if (this.registro_anos) data_registros['años'] = this.registro_anos
+      if (this.registro_lugar) data_registros['lugar'] = this.registro_lugar
+      if (this.registro_ramo) data_registros['ramo'] = this.registro_ramo
+      if (this.registro_encabezados) data_registros['encabezados'] = this.registro_encabezados
+      if (this.registro_notas) data_registros['notas'] = this.registro_notas
+      if (this.registro_transcripcion) data_registros['transcripcion'] = this.registro_transcripcion
+      firebaseDB.collection('Registro').doc(this.editar_registro_id).update(data_registros).then(() => {
+        this.$q.notify({
+          type: 'info',
+          textColor: 'grey-10',
+          multiLine: true,
+          message: `Se modificó el registro con ID ${this.editar_registro_id}`,
+          timeout: 2000
+        })
+      }).catch(error => {
+        console.log(error)
+      }).finally(() => {
+        this.limpiar_campos()
+        this.getRegistros()
+      })
+    },
+    deleteRegistro() {
+      firebaseDB.collection('Registro').doc(this.eliminar_registro_id).delete().then(() => {
         this.$q.notify({
           type: 'negative',
           multiLine: true,
-          message: `Se eliminó el registro "${this.eliminar_registro_nombre}"`,
+          message: `Se eliminó el registro "${this.eliminar_registro_id}"`,
           timeout: 2000
         })
-      } catch (error) {
+      }).catch(error => {
         console.log(error)
-      } finally {
-        this.eliminar_registro_nombre = undefined
-        this.eliminar_registro_id = undefined
-        await this.getRegistros()
-      }
+      }).finally(() => {
+        this.limpiar_campos()
+        this.getRegistros()
+      })
     },
     limpiar_campos() {
       this.registro_archivo = undefined
@@ -366,74 +438,76 @@ export default {
       this.registro_expediente = undefined
       this.registro_anos = undefined
       this.registro_lugar = undefined
-      this.nuevo_registro_ramo = undefined
-      this.nuevo_registro_encabezados = undefined
-      this.nuevo_registro_notas = undefined
-      this.nuevo_registro_transcripcion = undefined
-      this.nuevo_registro_usuario = undefined
+      this.registro_ramo = undefined
+      this.registro_encabezados = undefined
+      this.registro_notas = undefined
+      this.registro_transcripcion = undefined
+      this.registro_usuario = undefined
     },
     editRegistroDialog(props) {
       this.dialogo_editarregistro = true
-      this.editar_registro_nombre = props.row.nombre
-      this.editar_registro_id = props.row.id
+      if (props.row.id) this.editar_registro_id = props.row.id
+      if (props.row.archivo) this.registro_archivo = props.row.archivo
+      if (props.row.fondo) this.registro_fondo = props.row.fondo
+      if (props.row.libro) this.registro_libro = props.row.libro
+      if (props.row.foja) this.registro_foja = props.row.foja
+      if (props.row.caja) this.registro_caja = props.row.caja
+      if (props.row.expediente) this.registro_expediente = props.row.expediente
+      if (props.row.años) this.registro_anos = props.row.años.split(", ")
+      if (props.row.lugar) this.registro_lugar = props.row.lugar
+      if (props.row.ramo) this.registro_ramo = props.row.ramo
+      if (props.row.encabezados) {
+        this.registro_encabezados = []
+        let arr_encabezados = props.row.encabezados.split(" / ")
+        for (let i of arr_encabezados) {
+          this.registro_encabezados.push(i.substring(1, i.length - 1))
+        }
+      }
+      if (props.row.notas) {
+        this.registro_notas = []
+        let arr_notas = props.row.notas.split(" / ")
+        for (let i of arr_notas) {
+          this.registro_notas.push(i.substring(1, i.length - 1))
+        }
+      }
+      if (props.row.transcripcion) this.registro_transcripcion = props.row.transcripcion
     },
     deleteRegistroDialog(props) {
       this.dialogo_eliminarregistro = true
-      this.eliminar_registro_nombre = props.row.nombre
-      this.eliminar_registro_id = props.row.id
+      if (props.row.id) this.eliminar_registro_id = props.row.id
+      if (props.row.archivo) this.registro_archivo = props.row.archivo
+      if (props.row.fondo) this.registro_fondo = props.row.fondo
+      if (props.row.libro) this.registro_libro = props.row.libro
+      if (props.row.foja) this.registro_foja = props.row.foja
+      if (props.row.caja) this.registro_caja = props.row.caja
+      if (props.row.expediente) this.registro_expediente = props.row.expediente
+      if (props.row.años) this.registro_anos = props.row.años.split(", ")
+      if (props.row.lugar) this.registro_lugar = props.row.lugar
+      if (props.row.ramo) this.registro_ramo = props.row.ramo
+      if (props.row.encabezados) {
+        this.registro_encabezados = []
+        let arr_encabezados = props.row.encabezados.split(" / ")
+        for (let i of arr_encabezados) {
+          this.registro_encabezados.push(i.substring(1, i.length - 1))
+        }
+      }
+      if (props.row.notas) {
+        this.registro_notas = []
+        let arr_notas = props.row.notas.split(" / ")
+        for (let i of arr_notas) {
+          this.registro_notas.push(i.substring(1, i.length - 1))
+        }
+      }
+      if (props.row.transcripcion) this.registro_transcripcion = props.row.transcripcion
     },
     filterFn(val, update, abort) {
       update(() => {
-        console.log(val)
-        console.log(update)
         const needle = val.toLowerCase()
-        console.log(needle)
         this.options = this.total_options.filter(v => v.label.toLowerCase().indexOf(needle) > -1)
       })
     },
   },
-  computed: {
-    registronuevo_invalido() {
-      if (this.nuevo_registro_nombre) {
-        let existe = false;
-        for (let item of this.datos_registros) {
-          if (item.nombre === this.nuevo_registro_nombre) {
-            existe = true
-          }
-        }
-        return this.nuevo_registro_nombre.length < 1 || existe
-      } else {
-        return false
-      }
-    },
-    registromodificado_invalido() {
-      if (this.editar_registro_nombre) {
-        let existe = false;
-        for (let item of this.datos_registros) {
-          if (item.nombre === this.editar_registro_nombre && item.nombre !== this.editar_registro_id) {
-            existe = true
-          }
-        }
-        return this.editar_registro_nombre.length < 1 || existe
-      } else {
-        return false
-      }
-    },
-    mensaje_error() {
-      let mensaje = ""
-      for (let item of this.datos_registros) {
-        if (item.nombre === this.nuevo_registro_nombre) {
-          mensaje += "Ya existe un registro con ese nombre. "
-          console.log("existe")
-        }
-      }
-      return mensaje
-    }
-  },
-  watch: {
-    nuevo_registro_anos() {
-      console.log(this.registro_anos)
-    }
-  }
+  computed: {},
+  watch: {}
 }
 </script>
