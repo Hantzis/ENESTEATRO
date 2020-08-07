@@ -147,20 +147,10 @@ export default {
     this.getArchivos()
   },
   created() {
-    this.tabla_loading = true
     this.firebaseRef.onSnapshot({includeMetadataChanges: false}, snapshot => {
       this.tabla_loading = true
-      console.log("snap", snapshot)
-      console.log("fromCache", snapshot.metadata.fromCache)
-      console.log("docs", snapshot.docs)
-      console.log("docs", snapshot.docs.length)
-      console.log("DOCCHANGE: ", snapshot.docChanges())
       if (!((snapshot.docs.length == snapshot.docChanges().length) && snapshot.docChanges().length > 1)) {
         snapshot.docChanges().forEach(change => {
-          console.log("change", change)
-          console.log("change type", change.type)
-          console.log("doc id", change.doc.id)
-          console.log("doc data", change.doc.data())
           this.getArchivos()
           if (change.type === "added") {
             this.$q.notify({
@@ -189,33 +179,18 @@ export default {
         })
       }
       this.archivo_nombre = undefined;
+      this.archivo_id = undefined;
       this.tabla_loading = false
     }, error => {
       console.log("error", error)
     }, () => {
-      console.log("Al final!")
+      console.log("Complete")
     })
-    this.tabla_loading = false
   },
   methods: {
-    getArchivos1() {
-      console.log("get archivos")
-      this.tabla_loading = true
-      this.firebaseRef.get().then(response => {
-        this.datos_archivos = {}
-        response.forEach(res => {
-          this.datos_archivos[res.id] = {id: res.id, nombre: res.data().nombre}
-        })
-      }).catch(error => {
-        console.log(error)
-      }).finally(() => {
-        this.tabla_loading = false
-        // console.log("DATOS ARCHIVOS: ", this.datos_archivos)
-      })
-    },
     getArchivos() {
-      console.log("get archivos")
       this.tabla_loading = true
+      console.log("get archivos")
       this.firebaseRef.get().then(response => {
         this.datos_archivos = {}
         response.forEach(res => {
@@ -230,7 +205,6 @@ export default {
     addArchivo() {
       this.tabla_loading = true
       const add = this.firebaseRef.add({nombre: this.archivo_nombre})
-      console.log("ADD", add)
       this.tabla_loading = false
     },
     updateArchivo() {
