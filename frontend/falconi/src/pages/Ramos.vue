@@ -11,7 +11,7 @@
         <q-btn color="primary" style="margin-right: 12px;" @click="getRamos()">
           <q-icon left dense size="2em" name="mdi-sync" style="margin-right: -10px; margin-left: -10px;"/>
         </q-btn>
-        <q-btn color="green" @click="dialogo_nuevoramo = true">
+        <q-btn color="green" @click="addRamoDialog()">
           <q-icon left size="2em" name="mdi-plus"/>
           <div>Nuevo Ramo</div>
         </q-btn>
@@ -21,10 +21,9 @@
       <div class="col">
         <q-table
           title="Ramos"
-          :data.sync="datos_ramos"
+          :data.sync="Object.values(datos_ramos)"
           :columns="columns"
           row-key="id"
-          :grid1="$q.screen.xs"
           :loading="tabla_loading"
           :filter="filter"
         >
@@ -46,60 +45,71 @@
     </div>
 
     <q-dialog v-model="dialogo_nuevoramo" persistent>
-      <q-card>
-        <q-card-section class="">
-          <div class="row">
-            <p>Agregar nuevo ramo</p>
-          </div>
+      <q-card style="width: 500px; max-width: 80vw;">
+        <q-card-section class="row items-center">
+          <q-avatar icon="mdi-plus" color="green" text-color="white"/>
+          <q-toolbar-title>Agregar nuevo ramo</q-toolbar-title>
+        </q-card-section>
+        <q-separator/>
+        <q-card-section>
           <div class="row">
             <div class="col">
-              <q-input name="nombre" label="Nombre del ramo" v-model="nuevo_ramo_nombre"
+              <q-input name="nombre" label="Nombre del ramo" v-model="ramo_nombre"
                        :error-message="mensaje_error" :error="ramonuevo_invalido"/>
             </div>
           </div>
         </q-card-section>
+        <q-separator/>
         <q-card-actions align="right">
           <q-btn flat label="Cancelar" color="secondary" v-close-popup @click="cancelar_guardado()"/>
-          <q-btn flat label="Agregar nuevo" color="primary" v-close-popup
-                 :disable="ramonuevo_invalido || !this.nuevo_ramo_nombre"
+          <q-btn flat label="Agregar" color="primary" v-close-popup
+                 :disable="ramonuevo_invalido || !this.ramo_nombre"
                  @click="addRamo()"/>
         </q-card-actions>
       </q-card>
     </q-dialog>
     <q-dialog v-model="dialogo_editarramo" persistent>
-      <q-card>
-        <q-card-section class="">
-          <div class="row">
-            <p>Editar ramo</p>
-          </div>
+      <q-card style="width: 500px; max-width: 80vw;">
+        <q-card-section class="row items-center">
+          <q-avatar icon="edit" color="primary" text-color="white"/>
+          <q-toolbar-title>Editar ramo</q-toolbar-title>
+        </q-card-section>
+        <q-separator/>
+        <q-card-section>
           <div class="row">
             <div class="col">
-              <q-input name="nombre" label="Nombre del ramo" v-model="editar_ramo_nombre"
-                       :error-message="mensaje_error" :error="ramonuevo_invalido"/>
+              <q-input name="nombre" label="Nombre del ramo" v-model="ramo_nombre"
+                       :error-message="mensaje_error" :error="ramomodificado_invalido"/>
             </div>
           </div>
         </q-card-section>
+        <q-separator/>
         <q-card-actions align="right">
           <q-btn flat label="Cancelar" color="secondary" v-close-popup @click="cancelar_guardado()"/>
-          <q-btn flat label="Guardar edición" color="primary" v-close-popup
-                 :disable="ramomodificado_invalido || !this.editar_ramo_nombre"
+          <q-btn flat label="Guardar" color="primary" v-close-popup
+                 :disable="ramomodificado_invalido || !this.ramo_nombre"
                  @click="saveRamo()"/>
         </q-card-actions>
       </q-card>
     </q-dialog>
     <q-dialog v-model="dialogo_eliminarramo" persistent>
-      <q-card>
-        <q-card-section class="">
+      <q-card style="width: 500px; max-width: 80vw;">
+        <q-card-section class="row items-center">
+          <q-avatar icon="delete" color="red" text-color="white"/>
+          <q-toolbar-title>Eliminar ramo</q-toolbar-title>
+        </q-card-section>
+        <q-separator/>
+        <q-card-section>
           <div class="row">
             <p>¿Está seguro de eliminar este ramo?</p>
           </div>
           <div class="row">
             <div class="col">
-              <q-input readonly name="nombre" label="Nombre del ramo" v-model="eliminar_ramo_nombre"
-                       :error-message="mensaje_error" :error="ramonuevo_invalido"/>
+              <q-input readonly name="nombre" label="Nombre del ramo" v-model="ramo_nombre" />
             </div>
           </div>
         </q-card-section>
+        <q-separator/>
         <q-card-actions align="right">
           <q-btn flat label="Cancelar" color="secondary" v-close-popup @click="cancelar_guardado()"/>
           <q-btn flat label="Eliminar" color="red" v-close-popup
@@ -122,11 +132,8 @@ export default {
       dialogo_nuevoramo: false,
       dialogo_editarramo: false,
       dialogo_eliminarramo: false,
-      nuevo_ramo_nombre: undefined,
-      editar_ramo_nombre: undefined,
-      editar_ramo_id: undefined,
-      eliminar_ramo_nombre: undefined,
-      eliminar_ramo_id: undefined,
+      ramo_nombre: undefined,
+      ramo_nombre_id: undefined,
       columns: [
         {name: 'nombre', align: 'left', label: 'Nombre de Ramo', field: 'nombre', sortable: true},
         {name: 'actions', label: '', field: 'actions', align: 'right'},
@@ -140,120 +147,130 @@ export default {
     this.getRamos()
   },
   methods: {
-    async getRamos() {
-      try {
-        const resDB = await firebaseDB.collection('Ramo').get()
-        this.datos_ramos = []
-        resDB.forEach(res => {
-          const ramo = {id: res.id, nombre: res.data().nombre}
-          this.datos_ramos.push(ramo)
+    getRamos() {
+      this.tabla_loading = true
+      firebaseDB.collection('Ramo').get().then(response => {
+        this.datos_ramos = {}
+        response.forEach(res => {
+          this.datos_ramos[res.id] = {id: res.id, nombre: res.data().nombre}
         })
-        this.tabla_loading = false
-        return resDB
-      } catch (error) {
+      }).catch(error => {
         console.log(error)
+      }).finally(() => {
         this.tabla_loading = false
-      }
+        // console.log("DATOS ARCHIVOS: ", this.datos_ramos)
+      })
     },
-    async addRamo() {
-      try {
-        const resDB = await firebaseDB.collection('Ramo').add({nombre: this.nuevo_ramo_nombre})
+    addRamo() {
+      this.tabla_loading = true
+      firebaseDB.collection('Ramo').add({nombre: this.ramo_nombre}).then(response => {
+        console.log(response)
+        console.log(response.id)
+        this.datos_ramos[response.id] = {id:response.id, nombre: this.ramo_nombre}
         this.$q.notify({
           type: 'info',
           textColor: 'grey-10',
           multiLine: true,
-          message: `Se agregó el nuevo ramo "${this.nuevo_ramo_nombre}"`,
+          message: `Se agregó el nuevo ramo "${this.ramo_nombre}"`,
           timeout: 2000
         })
-      } catch (error) {
+      }).catch(error => {
         console.log(error)
-      } finally {
-        this.nuevo_ramo_nombre = undefined
-        await this.getRamos()
-      }
+      }).finally(() => {
+        this.ramo_nombre = undefined
+        this.ramo_id = undefined
+        this.tabla_loading = false
+      })
     },
-    async saveRamo() {
-      try {
-        await firebaseDB.collection('Ramo').doc(
-          this.editar_ramo_id).update({nombre: this.editar_ramo_nombre})
+    saveRamo() {
+      this.tabla_loading = true
+      firebaseDB.collection('Ramo').doc(this.ramo_id)
+        .update({nombre: this.ramo_nombre}).then(() => {
+        this.datos_ramos[this.ramo_id] = {id: this.ramo_id, nombre: this.ramo_nombre}
         this.$q.notify({
           type: 'info',
           textColor: 'grey-10',
           multiLine: true,
-          message: `Se modifico el ramo "${this.editar_ramo_nombre}"`,
+          message: `Se modifico el ramo "${this.ramo_nombre}"`,
           timeout: 2000
         })
-      } catch (error) {
+      }).catch(error => {
         console.log(error)
-      } finally {
-        this.editar_ramo_nombre = undefined
-        this.editar_ramo_id = undefined
-        await this.getRamos()
-      }
+      }).finally(() => {
+        this.ramo_nombre = undefined
+        this.ramo_id = undefined
+        this.tabla_loading = false
+      })
     },
-    async deleteRamo() {
-      try {
-        await firebaseDB.collection('Ramo').doc(this.eliminar_ramo_id).delete()
+    deleteRamo() {
+      this.tabla_loading = true
+      firebaseDB.collection('Ramo').doc(this.ramo_id).delete().then(() => {
+        delete this.datos_ramos[this.ramo_id]
         this.$q.notify({
           type: 'negative',
           multiLine: true,
-          message: `Se eliminó el ramo "${this.eliminar_ramo_nombre}"`,
+          message: `Se eliminó el ramo "${this.ramo_nombre}"`,
           timeout: 2000
         })
-      } catch (error) {
+      }).catch(error => {
         console.log(error)
-      } finally {
-        this.eliminar_ramo_nombre = undefined
-        this.eliminar_ramo_id = undefined
-        await this.getRamos()
-      }
+      }).finally(() => {
+        this.ramo_nombre = undefined
+        this.ramo_id = undefined
+        this.tabla_loading = false
+      })
     },
     cancelar_guardado() {
-      this.nuevo_ramo_nombre = undefined
-      this.editar_ramo_nombre = undefined
+      this.ramo_nombre = undefined
+      this.ramo_id = undefined
+    },
+    addRamoDialog() {
+      this.dialogo_nuevoramo = true
     },
     editRamoDialog(props) {
+      console.log(props)
       this.dialogo_editarramo = true
-      this.editar_ramo_nombre = props.row.nombre
-      this.editar_ramo_id = props.row.id
+      this.ramo_nombre = props.row.nombre
+      this.ramo_id = props.row.id
     },
     deleteRamoDialog(props) {
+      console.log(props)
       this.dialogo_eliminarramo = true
-      this.eliminar_ramo_nombre = props.row.nombre
-      this.eliminar_ramo_id = props.row.id
+      this.ramo_nombre = props.row.nombre
+      this.ramo_id = props.row.id
     },
   },
   computed: {
     ramonuevo_invalido() {
-      if (this.nuevo_ramo_nombre) {
+      if (this.ramo_nombre) {
         let existe = false;
-        for (let item of this.datos_ramos) {
-          if (item.nombre === this.nuevo_ramo_nombre) {
+        for (let item of Object.values(this.datos_ramos)) {
+          if (item.nombre === this.ramo_nombre) {
             existe = true
           }
         }
-        return this.nuevo_ramo_nombre.length < 1 || existe
+        return this.ramo_nombre.length < 1 || existe
       } else {
         return false
       }
     },
     ramomodificado_invalido() {
-      if (this.editar_ramo_nombre) {
+      if (this.ramo_nombre) {
         let existe = false;
-        for (let item of this.datos_ramos) {
-          if (item.nombre === this.editar_ramo_nombre && item.nombre !== this.editar_ramo_id) {
+        for (let item of Object.values(this.datos_ramos)) {
+          if (item.nombre === this.ramo_nombre && item.id !== this.ramo_id) {
             existe = true
           }
         }
-        return this.editar_ramo_nombre.length < 1 || existe
+        return this.ramo_nombre.length < 1 || existe
       } else {
         return false
       }
     },
     mensaje_error() {
       let mensaje = ""
-      for (let item of this.datos_ramos) {
-        if (item.nombre === this.nuevo_ramo_nombre) {
+      for (let item of Object.values(this.datos_ramos)) {
+        if (item.nombre === this.ramo_nombre) {
           mensaje += "Ya existe un ramo con ese nombre. "
         }
       }
