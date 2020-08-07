@@ -11,7 +11,7 @@
         <q-btn color="primary" style="margin-right: 12px;" @click="getFondos()">
           <q-icon left dense size="2em" name="mdi-sync" style="margin-right: -10px; margin-left: -10px;"/>
         </q-btn>
-        <q-btn color="green" @click="dialogo_nuevofondo = true">
+        <q-btn color="green" @click="addFondoDialog()">
           <q-icon left size="2em" name="mdi-plus"/>
           <div>Nuevo Fondo</div>
         </q-btn>
@@ -21,10 +21,9 @@
       <div class="col">
         <q-table
           title="Fondos"
-          :data.sync="datos_fondos"
+          :data.sync="Object.values(datos_fondos)"
           :columns="columns"
           row-key="id"
-          :grid1="$q.screen.xs"
           :loading="tabla_loading"
           :filter="filter"
         >
@@ -46,60 +45,71 @@
     </div>
 
     <q-dialog v-model="dialogo_nuevofondo" persistent>
-      <q-card>
-        <q-card-section class="">
-          <div class="row">
-            <p>Agregar nuevo fondo</p>
-          </div>
+      <q-card style="width: 500px; max-width: 80vw;">
+        <q-card-section class="row items-center">
+          <q-avatar icon="mdi-plus" color="green" text-color="white"/>
+          <q-toolbar-title>Agregar nuevo fondo</q-toolbar-title>
+        </q-card-section>
+        <q-separator/>
+        <q-card-section>
           <div class="row">
             <div class="col">
-              <q-input name="nombre" label="Nombre del fondo" v-model="nuevo_fondo_nombre"
+              <q-input name="nombre" label="Nombre del fondo" v-model="fondo_nombre"
                        :error-message="mensaje_error" :error="fondonuevo_invalido"/>
             </div>
           </div>
         </q-card-section>
+        <q-separator/>
         <q-card-actions align="right">
           <q-btn flat label="Cancelar" color="secondary" v-close-popup @click="cancelar_guardado()"/>
-          <q-btn flat label="Agregar nuevo" color="primary" v-close-popup
-                 :disable="fondonuevo_invalido || !this.nuevo_fondo_nombre"
+          <q-btn flat label="Agregar" color="primary" v-close-popup
+                 :disable="fondonuevo_invalido || !this.fondo_nombre"
                  @click="addFondo()"/>
         </q-card-actions>
       </q-card>
     </q-dialog>
     <q-dialog v-model="dialogo_editarfondo" persistent>
-      <q-card>
-        <q-card-section class="">
-          <div class="row">
-            <p>Editar fondo</p>
-          </div>
+      <q-card style="width: 500px; max-width: 80vw;">
+        <q-card-section class="row items-center">
+          <q-avatar icon="edit" color="primary" text-color="white"/>
+          <q-toolbar-title>Editar fondo</q-toolbar-title>
+        </q-card-section>
+        <q-separator/>
+        <q-card-section>
           <div class="row">
             <div class="col">
-              <q-input name="nombre" label="Nombre del fondo" v-model="editar_fondo_nombre"
-                       :error-message="mensaje_error" :error="fondonuevo_invalido"/>
+              <q-input name="nombre" label="Nombre del fondo" v-model="fondo_nombre"
+                       :error-message="mensaje_error" :error="fondomodificado_invalido"/>
             </div>
           </div>
         </q-card-section>
+        <q-separator/>
         <q-card-actions align="right">
           <q-btn flat label="Cancelar" color="secondary" v-close-popup @click="cancelar_guardado()"/>
-          <q-btn flat label="Guardar edición" color="primary" v-close-popup
-                 :disable="fondomodificado_invalido || !this.editar_fondo_nombre"
+          <q-btn flat label="Guardar" color="primary" v-close-popup
+                 :disable="fondomodificado_invalido || !this.fondo_nombre"
                  @click="saveFondo()"/>
         </q-card-actions>
       </q-card>
     </q-dialog>
     <q-dialog v-model="dialogo_eliminarfondo" persistent>
-      <q-card>
-        <q-card-section class="">
+      <q-card style="width: 500px; max-width: 80vw;">
+        <q-card-section class="row items-center">
+          <q-avatar icon="delete" color="red" text-color="white"/>
+          <q-toolbar-title>Eliminar fondo</q-toolbar-title>
+        </q-card-section>
+        <q-separator/>
+        <q-card-section>
           <div class="row">
             <p>¿Está seguro de eliminar este fondo?</p>
           </div>
           <div class="row">
             <div class="col">
-              <q-input readonly name="nombre" label="Nombre del fondo" v-model="eliminar_fondo_nombre"
-                       :error-message="mensaje_error" :error="fondonuevo_invalido"/>
+              <q-input readonly name="nombre" label="Nombre del fondo" v-model="fondo_nombre" />
             </div>
           </div>
         </q-card-section>
+        <q-separator/>
         <q-card-actions align="right">
           <q-btn flat label="Cancelar" color="secondary" v-close-popup @click="cancelar_guardado()"/>
           <q-btn flat label="Eliminar" color="red" v-close-popup
@@ -122,11 +132,8 @@ export default {
       dialogo_nuevofondo: false,
       dialogo_editarfondo: false,
       dialogo_eliminarfondo: false,
-      nuevo_fondo_nombre: undefined,
-      editar_fondo_nombre: undefined,
-      editar_fondo_id: undefined,
-      eliminar_fondo_nombre: undefined,
-      eliminar_fondo_id: undefined,
+      fondo_nombre: undefined,
+      fondo_nombre_id: undefined,
       columns: [
         {name: 'nombre', align: 'left', label: 'Nombre de Fondo', field: 'nombre', sortable: true},
         {name: 'actions', label: '', field: 'actions', align: 'right'},
@@ -140,120 +147,130 @@ export default {
     this.getFondos()
   },
   methods: {
-    async getFondos() {
-      try {
-        const resDB = await firebaseDB.collection('Fondo').get()
-        this.datos_fondos = []
-        resDB.forEach(res => {
-          const fondo = {id: res.id, nombre: res.data().nombre}
-          this.datos_fondos.push(fondo)
+    getFondos() {
+      this.tabla_loading = true
+      firebaseDB.collection('Fondo').get().then(response => {
+        this.datos_fondos = {}
+        response.forEach(res => {
+          this.datos_fondos[res.id] = {id: res.id, nombre: res.data().nombre}
         })
-        this.tabla_loading = false
-        return resDB
-      } catch (error) {
+      }).catch(error => {
         console.log(error)
+      }).finally(() => {
         this.tabla_loading = false
-      }
+        // console.log("DATOS ARCHIVOS: ", this.datos_fondos)
+      })
     },
-    async addFondo() {
-      try {
-        const resDB = await firebaseDB.collection('Fondo').add({nombre: this.nuevo_fondo_nombre})
+    addFondo() {
+      this.tabla_loading = true
+      firebaseDB.collection('Fondo').add({nombre: this.fondo_nombre}).then(response => {
+        console.log(response)
+        console.log(response.id)
+        this.datos_fondos[response.id] = {id:response.id, nombre: this.fondo_nombre}
         this.$q.notify({
           type: 'info',
           textColor: 'grey-10',
           multiLine: true,
-          message: `Se agregó el nuevo fondo "${this.nuevo_fondo_nombre}"`,
+          message: `Se agregó el nuevo fondo "${this.fondo_nombre}"`,
           timeout: 2000
         })
-      } catch (error) {
+      }).catch(error => {
         console.log(error)
-      } finally {
-        this.nuevo_fondo_nombre = undefined
-        await this.getFondos()
-      }
+      }).finally(() => {
+        this.fondo_nombre = undefined
+        this.fondo_id = undefined
+        this.tabla_loading = false
+      })
     },
-    async saveFondo() {
-      try {
-        await firebaseDB.collection('Fondo').doc(
-          this.editar_fondo_id).update({nombre: this.editar_fondo_nombre})
+    saveFondo() {
+      this.tabla_loading = true
+      firebaseDB.collection('Fondo').doc(this.fondo_id)
+        .update({nombre: this.fondo_nombre}).then(() => {
+        this.datos_fondos[this.fondo_id] = {id: this.fondo_id, nombre: this.fondo_nombre}
         this.$q.notify({
           type: 'info',
           textColor: 'grey-10',
           multiLine: true,
-          message: `Se modifico el fondo "${this.editar_fondo_nombre}"`,
+          message: `Se modifico el fondo "${this.fondo_nombre}"`,
           timeout: 2000
         })
-      } catch (error) {
+      }).catch(error => {
         console.log(error)
-      } finally {
-        this.editar_fondo_nombre = undefined
-        this.editar_fondo_id = undefined
-        await this.getFondos()
-      }
+      }).finally(() => {
+        this.fondo_nombre = undefined
+        this.fondo_id = undefined
+        this.tabla_loading = false
+      })
     },
-    async deleteFondo() {
-      try {
-        await firebaseDB.collection('Fondo').doc(this.eliminar_fondo_id).delete()
+    deleteFondo() {
+      this.tabla_loading = true
+      firebaseDB.collection('Fondo').doc(this.fondo_id).delete().then(() => {
+        delete this.datos_fondos[this.fondo_id]
         this.$q.notify({
           type: 'negative',
           multiLine: true,
-          message: `Se eliminó el fondo "${this.eliminar_fondo_nombre}"`,
+          message: `Se eliminó el fondo "${this.fondo_nombre}"`,
           timeout: 2000
         })
-      } catch (error) {
+      }).catch(error => {
         console.log(error)
-      } finally {
-        this.eliminar_fondo_nombre = undefined
-        this.eliminar_fondo_id = undefined
-        await this.getFondos()
-      }
+      }).finally(() => {
+        this.fondo_nombre = undefined
+        this.fondo_id = undefined
+        this.tabla_loading = false
+      })
     },
     cancelar_guardado() {
-      this.nuevo_fondo_nombre = undefined
-      this.editar_fondo_nombre = undefined
+      this.fondo_nombre = undefined
+      this.fondo_id = undefined
+    },
+    addFondoDialog() {
+      this.dialogo_nuevofondo = true
     },
     editFondoDialog(props) {
+      console.log(props)
       this.dialogo_editarfondo = true
-      this.editar_fondo_nombre = props.row.nombre
-      this.editar_fondo_id = props.row.id
+      this.fondo_nombre = props.row.nombre
+      this.fondo_id = props.row.id
     },
     deleteFondoDialog(props) {
+      console.log(props)
       this.dialogo_eliminarfondo = true
-      this.eliminar_fondo_nombre = props.row.nombre
-      this.eliminar_fondo_id = props.row.id
+      this.fondo_nombre = props.row.nombre
+      this.fondo_id = props.row.id
     },
   },
   computed: {
     fondonuevo_invalido() {
-      if (this.nuevo_fondo_nombre) {
+      if (this.fondo_nombre) {
         let existe = false;
-        for (let item of this.datos_fondos) {
-          if (item.nombre === this.nuevo_fondo_nombre) {
+        for (let item of Object.values(this.datos_fondos)) {
+          if (item.nombre === this.fondo_nombre) {
             existe = true
           }
         }
-        return this.nuevo_fondo_nombre.length < 1 || existe
+        return this.fondo_nombre.length < 1 || existe
       } else {
         return false
       }
     },
     fondomodificado_invalido() {
-      if (this.editar_fondo_nombre) {
+      if (this.fondo_nombre) {
         let existe = false;
-        for (let item of this.datos_fondos) {
-          if (item.nombre === this.editar_fondo_nombre && item.nombre !== this.editar_fondo_id) {
+        for (let item of Object.values(this.datos_fondos)) {
+          if (item.nombre === this.fondo_nombre && item.id !== this.fondo_id) {
             existe = true
           }
         }
-        return this.editar_fondo_nombre.length < 1 || existe
+        return this.fondo_nombre.length < 1 || existe
       } else {
         return false
       }
     },
     mensaje_error() {
       let mensaje = ""
-      for (let item of this.datos_fondos) {
-        if (item.nombre === this.nuevo_fondo_nombre) {
+      for (let item of Object.values(this.datos_fondos)) {
+        if (item.nombre === this.fondo_nombre) {
           mensaje += "Ya existe un fondo con ese nombre. "
         }
       }
