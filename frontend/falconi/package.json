@@ -4,7 +4,7 @@
   "description": "A Quasar Framework app",
   "productName": "Los Falconi",
   "cordovaId": "mx.unam.humanidades.udir.novohispano",
-  "capacitorId": "",
+  "capacitorId": "mx.unam.humanidades.udir.novohispano",
   "author": "César Benjamín García Martínez <cesar.benjamin@enesmorelia.unam.mx>",
   "private": true,
   "scripts": {

@@ -88,7 +88,7 @@
           <q-btn flat label="Cancelar" color="secondary" v-close-popup @click="cancelar_guardado()"/>
           <q-btn flat label="Guardar" color="primary" v-close-popup
                  :disable="archivomodificado_invalido || !this.archivo_nombre"
-                 @click="saveArchivo()"/>
+                 @click="updateArchivo()"/>
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -105,7 +105,7 @@
           </div>
           <div class="row">
             <div class="col">
-              <q-input readonly name="nombre" label="Nombre del archivo" v-model="archivo_nombre" />
+              <q-input readonly name="nombre" label="Nombre del archivo" v-model="archivo_nombre"/>
             </div>
           </div>
         </q-card-section>
@@ -123,6 +123,7 @@
 <script>
 import firebaseDB from "boot/firebase"
 
+
 export default {
   name: 'Archivos',
   data() {
@@ -139,17 +140,68 @@ export default {
         {name: 'actions', label: '', field: 'actions', align: 'right'},
       ],
       datos_archivos: [],
-      noti: () => {
-      },
+      firebaseRef: firebaseDB.collection('Archivo'),
     }
   },
   mounted() {
     this.getArchivos()
   },
-  methods: {
-    getArchivos() {
+  created() {
+    this.tabla_loading = true
+    this.firebaseRef.onSnapshot({includeMetadataChanges: false}, snapshot => {
       this.tabla_loading = true
-      firebaseDB.collection('Archivo').get().then(response => {
+      console.log("snap", snapshot)
+      console.log("fromCache", snapshot.metadata.fromCache)
+      console.log("docs", snapshot.docs)
+      console.log("docs", snapshot.docs.length)
+      console.log("DOCCHANGE: ", snapshot.docChanges())
+      if (!((snapshot.docs.length == snapshot.docChanges().length) && snapshot.docChanges().length > 1)) {
+        snapshot.docChanges().forEach(change => {
+          console.log("change", change)
+          console.log("change type", change.type)
+          console.log("doc id", change.doc.id)
+          console.log("doc data", change.doc.data())
+          this.getArchivos()
+          if (change.type === "added") {
+            this.$q.notify({
+              type: 'positive',
+              textColor: 'grey-10',
+              multiLine: true,
+              message: `Se agregó el nuevo archivo "${change.doc.data().nombre}"`,
+              timeout: 2000
+            })
+          } else if (change.type === "removed") {
+            this.$q.notify({
+              type: 'negative',
+              multiLine: true,
+              message: `Se eliminó el archivo "${change.doc.data().nombre}"`,
+              timeout: 2000
+            })
+          } else if (change.type === "modified") {
+            this.$q.notify({
+              type: 'info',
+              textColor: 'grey-10',
+              multiLine: true,
+              message: `Se modifico el archivo "${change.doc.data().nombre}"`,
+              timeout: 2000
+            })
+          }
+        })
+      }
+      this.archivo_nombre = undefined;
+      this.tabla_loading = false
+    }, error => {
+      console.log("error", error)
+    }, () => {
+      console.log("Al final!")
+    })
+    this.tabla_loading = false
+  },
+  methods: {
+    getArchivos1() {
+      console.log("get archivos")
+      this.tabla_loading = true
+      this.firebaseRef.get().then(response => {
         this.datos_archivos = {}
         response.forEach(res => {
           this.datos_archivos[res.id] = {id: res.id, nombre: res.data().nombre}
@@ -161,64 +213,35 @@ export default {
         // console.log("DATOS ARCHIVOS: ", this.datos_archivos)
       })
     },
-    addArchivo() {
+    getArchivos() {
+      console.log("get archivos")
       this.tabla_loading = true
-      firebaseDB.collection('Archivo').add({nombre: this.archivo_nombre}).then(response => {
-        console.log(response)
-        console.log(response.id)
-        this.datos_archivos[response.id] = {id:response.id, nombre: this.archivo_nombre}
-        this.$q.notify({
-          type: 'info',
-          textColor: 'grey-10',
-          multiLine: true,
-          message: `Se agregó el nuevo archivo "${this.archivo_nombre}"`,
-          timeout: 2000
+      this.firebaseRef.get().then(response => {
+        this.datos_archivos = {}
+        response.forEach(res => {
+          this.datos_archivos[res.id] = {id: res.id, nombre: res.data().nombre}
         })
       }).catch(error => {
         console.log(error)
       }).finally(() => {
-        this.archivo_nombre = undefined
-        this.archivo_id = undefined
         this.tabla_loading = false
       })
     },
-    saveArchivo() {
+    addArchivo() {
       this.tabla_loading = true
-      firebaseDB.collection('Archivo').doc(this.archivo_id)
-        .update({nombre: this.archivo_nombre}).then(() => {
-        this.datos_archivos[this.archivo_id] = {id: this.archivo_id, nombre: this.archivo_nombre}
-        this.$q.notify({
-          type: 'info',
-          textColor: 'grey-10',
-          multiLine: true,
-          message: `Se modifico el archivo "${this.archivo_nombre}"`,
-          timeout: 2000
-        })
-      }).catch(error => {
-        console.log(error)
-      }).finally(() => {
-        this.archivo_nombre = undefined
-        this.archivo_id = undefined
-        this.tabla_loading = false
-      })
+      const add = this.firebaseRef.add({nombre: this.archivo_nombre})
+      console.log("ADD", add)
+      this.tabla_loading = false
+    },
+    updateArchivo() {
+      this.tabla_loading = true
+      this.firebaseRef.doc(this.archivo_id).update({nombre: this.archivo_nombre})
+      this.tabla_loading = false
     },
     deleteArchivo() {
       this.tabla_loading = true
-      firebaseDB.collection('Archivo').doc(this.archivo_id).delete().then(() => {
-        delete this.datos_archivos[this.archivo_id]
-        this.$q.notify({
-          type: 'negative',
-          multiLine: true,
-          message: `Se eliminó el archivo "${this.archivo_nombre}"`,
-          timeout: 2000
-        })
-      }).catch(error => {
-        console.log(error)
-      }).finally(() => {
-        this.archivo_nombre = undefined
-        this.archivo_id = undefined
-        this.tabla_loading = false
-      })
+      this.firebaseRef.doc(this.archivo_id).delete()
+      this.tabla_loading = false
     },
     cancelar_guardado() {
       this.archivo_nombre = undefined
