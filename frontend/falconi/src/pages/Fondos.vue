@@ -88,7 +88,7 @@
           <q-btn flat label="Cancelar" color="secondary" v-close-popup @click="cancelar_guardado()"/>
           <q-btn flat label="Guardar" color="primary" v-close-popup
                  :disable="fondomodificado_invalido || !this.fondo_nombre"
-                 @click="saveFondo()"/>
+                 @click="updateFondo()"/>
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -105,7 +105,7 @@
           </div>
           <div class="row">
             <div class="col">
-              <q-input readonly name="nombre" label="Nombre del fondo" v-model="fondo_nombre" />
+              <q-input readonly name="nombre" label="Nombre del fondo" v-model="fondo_nombre"/>
             </div>
           </div>
         </q-card-section>
@@ -123,6 +123,7 @@
 <script>
 import firebaseDB from "boot/firebase"
 
+
 export default {
   name: 'Fondos',
   data() {
@@ -139,17 +140,58 @@ export default {
         {name: 'actions', label: '', field: 'actions', align: 'right'},
       ],
       datos_fondos: [],
-      noti: () => {
-      },
+      firebaseRef: firebaseDB.collection('Fondo'),
     }
   },
   mounted() {
     this.getFondos()
   },
+  created() {
+    this.firebaseRef.onSnapshot({includeMetadataChanges: false}, snapshot => {
+      this.tabla_loading = true
+      if (!((snapshot.docs.length == snapshot.docChanges().length) && snapshot.docChanges().length > 1)) {
+        snapshot.docChanges().forEach(change => {
+          this.getFondos()
+          if (change.type === "added") {
+            this.$q.notify({
+              type: 'positive',
+              textColor: 'grey-10',
+              multiLine: true,
+              message: `Se agregó el nuevo fondo "${change.doc.data().nombre}"`,
+              timeout: 2000
+            })
+          } else if (change.type === "removed") {
+            this.$q.notify({
+              type: 'negative',
+              multiLine: true,
+              message: `Se eliminó el fondo "${change.doc.data().nombre}"`,
+              timeout: 2000
+            })
+          } else if (change.type === "modified") {
+            this.$q.notify({
+              type: 'info',
+              textColor: 'grey-10',
+              multiLine: true,
+              message: `Se modifico el fondo "${change.doc.data().nombre}"`,
+              timeout: 2000
+            })
+          }
+        })
+      }
+      this.fondo_nombre = undefined;
+      this.fondo_id = undefined;
+      this.tabla_loading = false
+    }, error => {
+      console.log("error", error)
+    }, () => {
+      console.log("Complete")
+    })
+  },
   methods: {
     getFondos() {
       this.tabla_loading = true
-      firebaseDB.collection('Fondo').get().then(response => {
+      console.log("get fondos")
+      this.firebaseRef.get().then(response => {
         this.datos_fondos = {}
         response.forEach(res => {
           this.datos_fondos[res.id] = {id: res.id, nombre: res.data().nombre}
@@ -158,67 +200,22 @@ export default {
         console.log(error)
       }).finally(() => {
         this.tabla_loading = false
-        // console.log("DATOS ARCHIVOS: ", this.datos_fondos)
       })
     },
     addFondo() {
       this.tabla_loading = true
-      firebaseDB.collection('Fondo').add({nombre: this.fondo_nombre}).then(response => {
-        console.log(response)
-        console.log(response.id)
-        this.datos_fondos[response.id] = {id:response.id, nombre: this.fondo_nombre}
-        this.$q.notify({
-          type: 'info',
-          textColor: 'grey-10',
-          multiLine: true,
-          message: `Se agregó el nuevo fondo "${this.fondo_nombre}"`,
-          timeout: 2000
-        })
-      }).catch(error => {
-        console.log(error)
-      }).finally(() => {
-        this.fondo_nombre = undefined
-        this.fondo_id = undefined
-        this.tabla_loading = false
-      })
+      const add = this.firebaseRef.add({nombre: this.fondo_nombre})
+      this.tabla_loading = false
     },
-    saveFondo() {
+    updateFondo() {
       this.tabla_loading = true
-      firebaseDB.collection('Fondo').doc(this.fondo_id)
-        .update({nombre: this.fondo_nombre}).then(() => {
-        this.datos_fondos[this.fondo_id] = {id: this.fondo_id, nombre: this.fondo_nombre}
-        this.$q.notify({
-          type: 'info',
-          textColor: 'grey-10',
-          multiLine: true,
-          message: `Se modifico el fondo "${this.fondo_nombre}"`,
-          timeout: 2000
-        })
-      }).catch(error => {
-        console.log(error)
-      }).finally(() => {
-        this.fondo_nombre = undefined
-        this.fondo_id = undefined
-        this.tabla_loading = false
-      })
+      this.firebaseRef.doc(this.fondo_id).update({nombre: this.fondo_nombre})
+      this.tabla_loading = false
     },
     deleteFondo() {
       this.tabla_loading = true
-      firebaseDB.collection('Fondo').doc(this.fondo_id).delete().then(() => {
-        delete this.datos_fondos[this.fondo_id]
-        this.$q.notify({
-          type: 'negative',
-          multiLine: true,
-          message: `Se eliminó el fondo "${this.fondo_nombre}"`,
-          timeout: 2000
-        })
-      }).catch(error => {
-        console.log(error)
-      }).finally(() => {
-        this.fondo_nombre = undefined
-        this.fondo_id = undefined
-        this.tabla_loading = false
-      })
+      this.firebaseRef.doc(this.fondo_id).delete()
+      this.tabla_loading = false
     },
     cancelar_guardado() {
       this.fondo_nombre = undefined

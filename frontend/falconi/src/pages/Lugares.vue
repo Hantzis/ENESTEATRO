@@ -88,7 +88,7 @@
           <q-btn flat label="Cancelar" color="secondary" v-close-popup @click="cancelar_guardado()"/>
           <q-btn flat label="Guardar" color="primary" v-close-popup
                  :disable="lugarmodificado_invalido || !this.lugar_nombre"
-                 @click="saveLugar()"/>
+                 @click="updateLugar()"/>
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -105,7 +105,7 @@
           </div>
           <div class="row">
             <div class="col">
-              <q-input readonly name="nombre" label="Nombre del lugar" v-model="lugar_nombre" />
+              <q-input readonly name="nombre" label="Nombre del lugar" v-model="lugar_nombre"/>
             </div>
           </div>
         </q-card-section>
@@ -123,6 +123,7 @@
 <script>
 import firebaseDB from "boot/firebase"
 
+
 export default {
   name: 'Lugares',
   data() {
@@ -139,17 +140,58 @@ export default {
         {name: 'actions', label: '', field: 'actions', align: 'right'},
       ],
       datos_lugares: [],
-      noti: () => {
-      },
+      firebaseRef: firebaseDB.collection('Lugar'),
     }
   },
   mounted() {
     this.getLugares()
   },
+  created() {
+    this.firebaseRef.onSnapshot({includeMetadataChanges: false}, snapshot => {
+      this.tabla_loading = true
+      if (!((snapshot.docs.length == snapshot.docChanges().length) && snapshot.docChanges().length > 1)) {
+        snapshot.docChanges().forEach(change => {
+          this.getLugares()
+          if (change.type === "added") {
+            this.$q.notify({
+              type: 'positive',
+              textColor: 'grey-10',
+              multiLine: true,
+              message: `Se agregó el nuevo lugar "${change.doc.data().nombre}"`,
+              timeout: 2000
+            })
+          } else if (change.type === "removed") {
+            this.$q.notify({
+              type: 'negative',
+              multiLine: true,
+              message: `Se eliminó el lugar "${change.doc.data().nombre}"`,
+              timeout: 2000
+            })
+          } else if (change.type === "modified") {
+            this.$q.notify({
+              type: 'info',
+              textColor: 'grey-10',
+              multiLine: true,
+              message: `Se modifico el lugar "${change.doc.data().nombre}"`,
+              timeout: 2000
+            })
+          }
+        })
+      }
+      this.lugar_nombre = undefined;
+      this.lugar_id = undefined;
+      this.tabla_loading = false
+    }, error => {
+      console.log("error", error)
+    }, () => {
+      console.log("Complete")
+    })
+  },
   methods: {
     getLugares() {
       this.tabla_loading = true
-      firebaseDB.collection('Lugar').get().then(response => {
+      console.log("get lugares")
+      this.firebaseRef.get().then(response => {
         this.datos_lugares = {}
         response.forEach(res => {
           this.datos_lugares[res.id] = {id: res.id, nombre: res.data().nombre}
@@ -158,67 +200,22 @@ export default {
         console.log(error)
       }).finally(() => {
         this.tabla_loading = false
-        // console.log("DATOS ARCHIVOS: ", this.datos_lugares)
       })
     },
     addLugar() {
       this.tabla_loading = true
-      firebaseDB.collection('Lugar').add({nombre: this.lugar_nombre}).then(response => {
-        console.log(response)
-        console.log(response.id)
-        this.datos_lugares[response.id] = {id:response.id, nombre: this.lugar_nombre}
-        this.$q.notify({
-          type: 'info',
-          textColor: 'grey-10',
-          multiLine: true,
-          message: `Se agregó el nuevo lugar "${this.lugar_nombre}"`,
-          timeout: 2000
-        })
-      }).catch(error => {
-        console.log(error)
-      }).finally(() => {
-        this.lugar_nombre = undefined
-        this.lugar_id = undefined
-        this.tabla_loading = false
-      })
+      const add = this.firebaseRef.add({nombre: this.lugar_nombre})
+      this.tabla_loading = false
     },
-    saveLugar() {
+    updateLugar() {
       this.tabla_loading = true
-      firebaseDB.collection('Lugar').doc(this.lugar_id)
-        .update({nombre: this.lugar_nombre}).then(() => {
-        this.datos_lugares[this.lugar_id] = {id: this.lugar_id, nombre: this.lugar_nombre}
-        this.$q.notify({
-          type: 'info',
-          textColor: 'grey-10',
-          multiLine: true,
-          message: `Se modifico el lugar "${this.lugar_nombre}"`,
-          timeout: 2000
-        })
-      }).catch(error => {
-        console.log(error)
-      }).finally(() => {
-        this.lugar_nombre = undefined
-        this.lugar_id = undefined
-        this.tabla_loading = false
-      })
+      this.firebaseRef.doc(this.lugar_id).update({nombre: this.lugar_nombre})
+      this.tabla_loading = false
     },
     deleteLugar() {
       this.tabla_loading = true
-      firebaseDB.collection('Lugar').doc(this.lugar_id).delete().then(() => {
-        delete this.datos_lugares[this.lugar_id]
-        this.$q.notify({
-          type: 'negative',
-          multiLine: true,
-          message: `Se eliminó el lugar "${this.lugar_nombre}"`,
-          timeout: 2000
-        })
-      }).catch(error => {
-        console.log(error)
-      }).finally(() => {
-        this.lugar_nombre = undefined
-        this.lugar_id = undefined
-        this.tabla_loading = false
-      })
+      this.firebaseRef.doc(this.lugar_id).delete()
+      this.tabla_loading = false
     },
     cancelar_guardado() {
       this.lugar_nombre = undefined

@@ -88,7 +88,7 @@
           <q-btn flat label="Cancelar" color="secondary" v-close-popup @click="cancelar_guardado()"/>
           <q-btn flat label="Guardar" color="primary" v-close-popup
                  :disable="ramomodificado_invalido || !this.ramo_nombre"
-                 @click="saveRamo()"/>
+                 @click="updateRamo()"/>
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -105,7 +105,7 @@
           </div>
           <div class="row">
             <div class="col">
-              <q-input readonly name="nombre" label="Nombre del ramo" v-model="ramo_nombre" />
+              <q-input readonly name="nombre" label="Nombre del ramo" v-model="ramo_nombre"/>
             </div>
           </div>
         </q-card-section>
@@ -123,6 +123,7 @@
 <script>
 import firebaseDB from "boot/firebase"
 
+
 export default {
   name: 'Ramos',
   data() {
@@ -139,17 +140,58 @@ export default {
         {name: 'actions', label: '', field: 'actions', align: 'right'},
       ],
       datos_ramos: [],
-      noti: () => {
-      },
+      firebaseRef: firebaseDB.collection('Ramo'),
     }
   },
   mounted() {
     this.getRamos()
   },
+  created() {
+    this.firebaseRef.onSnapshot({includeMetadataChanges: false}, snapshot => {
+      this.tabla_loading = true
+      if (!((snapshot.docs.length == snapshot.docChanges().length) && snapshot.docChanges().length > 1)) {
+        snapshot.docChanges().forEach(change => {
+          this.getRamos()
+          if (change.type === "added") {
+            this.$q.notify({
+              type: 'positive',
+              textColor: 'grey-10',
+              multiLine: true,
+              message: `Se agregó el nuevo ramo "${change.doc.data().nombre}"`,
+              timeout: 2000
+            })
+          } else if (change.type === "removed") {
+            this.$q.notify({
+              type: 'negative',
+              multiLine: true,
+              message: `Se eliminó el ramo "${change.doc.data().nombre}"`,
+              timeout: 2000
+            })
+          } else if (change.type === "modified") {
+            this.$q.notify({
+              type: 'info',
+              textColor: 'grey-10',
+              multiLine: true,
+              message: `Se modifico el ramo "${change.doc.data().nombre}"`,
+              timeout: 2000
+            })
+          }
+        })
+      }
+      this.ramo_nombre = undefined;
+      this.ramo_id = undefined;
+      this.tabla_loading = false
+    }, error => {
+      console.log("error", error)
+    }, () => {
+      console.log("Complete")
+    })
+  },
   methods: {
     getRamos() {
       this.tabla_loading = true
-      firebaseDB.collection('Ramo').get().then(response => {
+      console.log("get ramos")
+      this.firebaseRef.get().then(response => {
         this.datos_ramos = {}
         response.forEach(res => {
           this.datos_ramos[res.id] = {id: res.id, nombre: res.data().nombre}
@@ -158,67 +200,22 @@ export default {
         console.log(error)
       }).finally(() => {
         this.tabla_loading = false
-        // console.log("DATOS ARCHIVOS: ", this.datos_ramos)
       })
     },
     addRamo() {
       this.tabla_loading = true
-      firebaseDB.collection('Ramo').add({nombre: this.ramo_nombre}).then(response => {
-        console.log(response)
-        console.log(response.id)
-        this.datos_ramos[response.id] = {id:response.id, nombre: this.ramo_nombre}
-        this.$q.notify({
-          type: 'info',
-          textColor: 'grey-10',
-          multiLine: true,
-          message: `Se agregó el nuevo ramo "${this.ramo_nombre}"`,
-          timeout: 2000
-        })
-      }).catch(error => {
-        console.log(error)
-      }).finally(() => {
-        this.ramo_nombre = undefined
-        this.ramo_id = undefined
-        this.tabla_loading = false
-      })
+      const add = this.firebaseRef.add({nombre: this.ramo_nombre})
+      this.tabla_loading = false
     },
-    saveRamo() {
+    updateRamo() {
       this.tabla_loading = true
-      firebaseDB.collection('Ramo').doc(this.ramo_id)
-        .update({nombre: this.ramo_nombre}).then(() => {
-        this.datos_ramos[this.ramo_id] = {id: this.ramo_id, nombre: this.ramo_nombre}
-        this.$q.notify({
-          type: 'info',
-          textColor: 'grey-10',
-          multiLine: true,
-          message: `Se modifico el ramo "${this.ramo_nombre}"`,
-          timeout: 2000
-        })
-      }).catch(error => {
-        console.log(error)
-      }).finally(() => {
-        this.ramo_nombre = undefined
-        this.ramo_id = undefined
-        this.tabla_loading = false
-      })
+      this.firebaseRef.doc(this.ramo_id).update({nombre: this.ramo_nombre})
+      this.tabla_loading = false
     },
     deleteRamo() {
       this.tabla_loading = true
-      firebaseDB.collection('Ramo').doc(this.ramo_id).delete().then(() => {
-        delete this.datos_ramos[this.ramo_id]
-        this.$q.notify({
-          type: 'negative',
-          multiLine: true,
-          message: `Se eliminó el ramo "${this.ramo_nombre}"`,
-          timeout: 2000
-        })
-      }).catch(error => {
-        console.log(error)
-      }).finally(() => {
-        this.ramo_nombre = undefined
-        this.ramo_id = undefined
-        this.tabla_loading = false
-      })
+      this.firebaseRef.doc(this.ramo_id).delete()
+      this.tabla_loading = false
     },
     cancelar_guardado() {
       this.ramo_nombre = undefined
