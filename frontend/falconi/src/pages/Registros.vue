@@ -11,7 +11,7 @@
         <q-btn color="primary" style="margin-right: 12px;" @click="getRegistros()">
           <q-icon left dense size="2em" name="mdi-sync" style="margin-right: -10px; margin-left: -10px;"/>
         </q-btn>
-        <q-btn color="green" @click="dialogo_nuevoregistro = true">
+        <q-btn color="green" @click="addRegistroDialog()">
           <q-icon left size="2em" name="mdi-plus"/>
           <div>Nuevo Registro</div>
         </q-btn>
@@ -119,7 +119,7 @@
         <q-card-actions align="right">
           <q-btn flat label="Cancelar" color="secondary" v-close-popup @click="limpiar_campos()"/>
           <q-btn flat label="Guardar cambios" color="primary" v-close-popup
-                 @click="saveRegistro()"/>
+                 @click="updateRegistro()"/>
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -204,11 +204,7 @@ export default {
       registro_notas: undefined,
       registro_transcripcion: undefined,
       registro_usuario: undefined,
-      registro_nombre: undefined,
-      editar_registro: undefined,
-      editar_registro_id: undefined,
-      eliminar_registro_nombre: undefined,
-      eliminar_registro_id: undefined,
+      registro_id: undefined,
       columns: [
         {name: 'archivo', align: 'left', label: 'Archivo', field: 'archivo', sortable: true},
         {name: 'fondo', align: 'left', label: 'Fondo', field: 'fondo', sortable: true},
@@ -230,11 +226,65 @@ export default {
       lugares: undefined,
       ramos: undefined,
       datos_registros: [],
+      firebaseRef: firebaseDB.collection('Registro'),
     }
   },
   mounted() {
     this.getCampos()
     this.getRegistros()
+  },
+  created() {
+    this.firebaseRef.onSnapshot({includeMetadataChanges: false}, snapshot => {
+      this.tabla_loading = true
+      if (!((snapshot.docs.length == snapshot.docChanges().length) && snapshot.docChanges().length > 1)) {
+        snapshot.docChanges().forEach(change => {
+          this.getRegistros()
+          if (change.type === "added") {
+            this.$q.notify({
+              type: 'positive',
+              textColor: 'grey-10',
+              multiLine: true,
+              message: `Se agregó el nuevo registro con ID "${change.doc.id}"`,
+              timeout: 2000
+            })
+          } else if (change.type === "removed") {
+            this.$q.notify({
+              type: 'negative',
+              multiLine: true,
+              message: `Se eliminó el registro con ID "${change.doc.id}"`,
+              timeout: 2000
+            })
+          } else if (change.type === "modified") {
+            this.$q.notify({
+              type: 'info',
+              textColor: 'grey-10',
+              multiLine: true,
+              message: `Se modifico el registro con ID "${change.doc.id}"`,
+              timeout: 2000
+            })
+          }
+        })
+      }
+      this.registro_archivo = undefined
+      this.registro_fondo = undefined
+      this.registro_libro = undefined
+      this.registro_foja = undefined
+      this.registro_caja = undefined
+      this.registro_expediente = undefined
+      this.registro_anos = undefined
+      this.registro_lugar = undefined
+      this.registro_ramo = undefined
+      this.registro_encabezados = undefined
+      this.registro_notas = undefined
+      this.registro_transcripcion = undefined
+      this.registro_usuario = undefined
+      this.registro_id = undefined
+      this.tabla_loading = false
+    }, error => {
+      console.log("error", error)
+    }, () => {
+      console.log("Complete")
+    })
   },
   methods: {
     getArchivos() {
@@ -296,6 +346,8 @@ export default {
       this.getRamos()
     },
     getRegistros() {
+      this.tabla_loading = true
+      this.getCampos()
       firebaseDB.collection('Registro').get().then(resDB => {
         this.datos_registros = [];
         resDB.forEach(res => {
@@ -333,44 +385,30 @@ export default {
           };
           this.datos_registros.push(registro);
         });
-        this.tabla_loading = false
       }).catch(error => {
         console.log(error);
         this.tabla_loading = false;
+      }).finally(() => {
+        this.tabla_loading = false
       })
     },
-    async addRegistro1() {
-      try {
-        await firebaseDB.collection('Registro').add(data_registros)
-        this.$q.notify({
-          type: 'info',
-          textColor: 'grey-10',
-          multiLine: true,
-          message: `Se agregó el nuevo registro con ID ${response.id}`,
-          timeout: 2000
-        })
-      } catch (error) {
-        console.log(error)
-      } finally {
-        this.limpiar_campos()
-        await this.getRegistros()
-      }
-    },
     addRegistro() {
-      const data_registros = {}
-      if (this.registro_archivo) data_registros['archivo'] = this.registro_archivo
-      if (this.registro_fondo) data_registros['fondo'] = this.registro_fondo
-      if (this.registro_libro) data_registros['libro'] = this.registro_libro
-      if (this.registro_foja) data_registros['foja'] = this.registro_foja
-      if (this.registro_caja) data_registros['caja'] = this.registro_caja
-      if (this.registro_expediente) data_registros['expediente'] = this.registro_expediente
-      if (this.registro_anos) data_registros['años'] = this.registro_anos
-      if (this.registro_lugar) data_registros['lugar'] = this.registro_lugar
-      if (this.registro_ramo) data_registros['ramo'] = this.registro_ramo
-      if (this.registro_encabezados) data_registros['encabezados'] = this.registro_encabezados
-      if (this.registro_notas) data_registros['notas'] = this.registro_notas
-      if (this.registro_transcripcion) data_registros['transcripcion'] = this.registro_transcripcion
-      firebaseDB.collection('Registro').add(data_registros).then(response => {
+      const data_registro = {}
+      if (this.registro_archivo) data_registro['archivo'] = this.registro_archivo
+      if (this.registro_fondo) data_registro['fondo'] = this.registro_fondo
+      if (this.registro_libro) data_registro['libro'] = this.registro_libro
+      if (this.registro_foja) data_registro['foja'] = this.registro_foja
+      if (this.registro_caja) data_registro['caja'] = this.registro_caja
+      if (this.registro_expediente) data_registro['expediente'] = this.registro_expediente
+      if (this.registro_anos) data_registro['años'] = this.registro_anos
+      if (this.registro_lugar) data_registro['lugar'] = this.registro_lugar
+      if (this.registro_ramo) data_registro['ramo'] = this.registro_ramo
+      if (this.registro_encabezados) data_registro['encabezados'] = this.registro_encabezados
+      if (this.registro_notas) data_registro['notas'] = this.registro_notas
+      if (this.registro_transcripcion) data_registro['transcripcion'] = this.registro_transcripcion
+      firebaseDB.collection('Registro').add(data_registro)
+
+        /* .then(response => {
         this.$q.notify({
           type: 'info',
           textColor: 'grey-10',
@@ -383,23 +421,24 @@ export default {
       }).finally(() => {
         this.limpiar_campos()
         this.getRegistros()
-      })
+      }) */
     },
-    saveRegistro() {
-      const data_registros = {}
-      if (this.registro_archivo) data_registros['archivo'] = this.registro_archivo
-      if (this.registro_fondo) data_registros['fondo'] = this.registro_fondo
-      if (this.registro_libro) data_registros['libro'] = this.registro_libro
-      if (this.registro_foja) data_registros['foja'] = this.registro_foja
-      if (this.registro_caja) data_registros['caja'] = this.registro_caja
-      if (this.registro_expediente) data_registros['expediente'] = this.registro_expediente
-      if (this.registro_anos) data_registros['años'] = this.registro_anos
-      if (this.registro_lugar) data_registros['lugar'] = this.registro_lugar
-      if (this.registro_ramo) data_registros['ramo'] = this.registro_ramo
-      if (this.registro_encabezados) data_registros['encabezados'] = this.registro_encabezados
-      if (this.registro_notas) data_registros['notas'] = this.registro_notas
-      if (this.registro_transcripcion) data_registros['transcripcion'] = this.registro_transcripcion
-      firebaseDB.collection('Registro').doc(this.editar_registro_id).update(data_registros).then(() => {
+    updateRegistro() {
+      const data_registro = {}
+      if (this.registro_archivo) data_registro['archivo'] = this.registro_archivo
+      if (this.registro_fondo) data_registro['fondo'] = this.registro_fondo
+      if (this.registro_libro) data_registro['libro'] = this.registro_libro
+      if (this.registro_foja) data_registro['foja'] = this.registro_foja
+      if (this.registro_caja) data_registro['caja'] = this.registro_caja
+      if (this.registro_expediente) data_registro['expediente'] = this.registro_expediente
+      if (this.registro_anos) data_registro['años'] = this.registro_anos
+      if (this.registro_lugar) data_registro['lugar'] = this.registro_lugar
+      if (this.registro_ramo) data_registro['ramo'] = this.registro_ramo
+      if (this.registro_encabezados) data_registro['encabezados'] = this.registro_encabezados
+      if (this.registro_notas) data_registro['notas'] = this.registro_notas
+      if (this.registro_transcripcion) data_registro['transcripcion'] = this.registro_transcripcion
+      firebaseDB.collection('Registro').doc(this.registro_id).update(data_registro)
+        /*.then(() => {
         this.$q.notify({
           type: 'info',
           textColor: 'grey-10',
@@ -412,10 +451,12 @@ export default {
       }).finally(() => {
         this.limpiar_campos()
         this.getRegistros()
-      })
+      })*/
     },
     deleteRegistro() {
-      firebaseDB.collection('Registro').doc(this.eliminar_registro_id).delete().then(() => {
+      firebaseDB.collection('Registro').doc(this.eliminar_registro_id).delete()
+
+      /*.then(() => {
         this.$q.notify({
           type: 'negative',
           multiLine: true,
@@ -427,7 +468,7 @@ export default {
       }).finally(() => {
         this.limpiar_campos()
         this.getRegistros()
-      })
+      }) */
     },
     limpiar_campos() {
       this.registro_archivo = undefined
@@ -444,9 +485,12 @@ export default {
       this.registro_transcripcion = undefined
       this.registro_usuario = undefined
     },
+    addRegistroDialog() {
+      this.dialogo_nuevoregistro = true
+    },
     editRegistroDialog(props) {
       this.dialogo_editarregistro = true
-      if (props.row.id) this.editar_registro_id = props.row.id
+      if (props.row.id) this.registro_id = props.row.id
       if (props.row.archivo) this.registro_archivo = props.row.archivo
       if (props.row.fondo) this.registro_fondo = props.row.fondo
       if (props.row.libro) this.registro_libro = props.row.libro
@@ -506,8 +550,6 @@ export default {
         this.options = this.total_options.filter(v => v.label.toLowerCase().indexOf(needle) > -1)
       })
     },
-  },
-  computed: {},
-  watch: {}
+  }
 }
 </script>
