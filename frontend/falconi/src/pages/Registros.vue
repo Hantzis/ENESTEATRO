@@ -8,10 +8,10 @@
     </div>
     <div class="row" style="padding-bottom: 10px;">
       <div class="col" :align="'right'">
-        <q-btn color="primary" style="margin-right: 12px;" @click="getRegistros()">
+        <q-btn color="primary" @click="getRegistros()">
           <q-icon left dense size="2em" name="mdi-sync" style="margin-right: -10px; margin-left: -10px;"/>
         </q-btn>
-        <q-btn color="green" @click="addRegistroDialog()">
+        <q-btn v-if="es_usuario" style="margin-left: 8px;" color="green" @click="addRegistroDialog()">
           <q-icon left size="2em" name="mdi-plus"/>
           <div>Nuevo Registro</div>
         </q-btn>
@@ -90,8 +90,10 @@
               <q-td auto-width>
                 <q-btn dense round flat color="accent" @click="props.expand = !props.expand"
                        :icon="props.expand ? 'remove' : 'add'"></q-btn>
-                <q-btn dense round flat color="primary" @click="editRegistroDialog(props)" icon="edit"></q-btn>
-                <q-btn dense round flat color="red" @click="deleteRegistroDialog(props)" icon="delete"></q-btn>
+                <q-btn v-if="es_usuario" dense round flat color="primary" @click="editRegistroDialog(props)"
+                       icon="edit"></q-btn>
+                <q-btn v-if="es_usuario" dense round flat color="red" @click="deleteRegistroDialog(props)"
+                       icon="delete"></q-btn>
               </q-td>
             </q-tr>
             <q-tr v-show="props.expand" :props="props">
@@ -316,6 +318,7 @@ export default {
       ramos: undefined,
       datos_registros: [],
       es_usuario: false,
+      es_admin: false,
       firebaseRef: firebaseDB.collection('Registro'),
     }
   },

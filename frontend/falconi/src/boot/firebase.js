@@ -10,11 +10,8 @@ const firebaseConfig = {
   appId: "1:509908612887:web:3a8f081fed8b19e17a6952",
 };
 
-/* const app = firebase.initializeApp(firebaseConfig)
-const firebaseDB = firebase.firestore(); */
-
 const firebaseDB = firebase.initializeApp(firebaseConfig).firestore()
-firebaseDB.enablePersistence().catch(err => {
+firebaseDB.enablePersistence({synchronizeTabs:true}).catch(err => {
   console.log(err)
   alert(err)
   if (err.code == 'failed-precondition') {

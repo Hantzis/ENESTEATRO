@@ -105,7 +105,7 @@
       <q-img class="absolute-top" src="https://cdn.quasar.dev/img/material.png" style="height: 150px">
         <div v-if="es_usuario" class="absolute-bottom bg-transparent">
           <q-avatar size="56px" class="q-mb-sm">
-            <img :src="get_gravatar(usuario.email, 150)">
+            <img :src="get_gravatar(usuario.email, 150)" :alt="usuario.displayName">
           </q-avatar>
           <div class="text-weight-bold">{{ usuario.displayName }}</div>
           <div>
@@ -115,7 +115,7 @@
         </div>
         <div v-else class="absolute-bottom bg-transparent">
           <q-avatar size="56px" class="q-mb-sm">
-            <img src="~assets/logo_udir.png">
+            <img src="~assets/logo_udir.png" :alt="usuario.displayName">
           </q-avatar>
           <div class="text-weight-bold">Anónimo</div>
           <div>
@@ -144,7 +144,7 @@
         <q-card-section>
           <q-toolbar>
             <q-avatar>
-              <img src="~assets/logo_udir.png">
+              <img src="~assets/logo_udir.png" alt="Logo UDIR">
             </q-avatar>
             <q-toolbar-title>Novísima compañía de teatro popular novohispano <span class="text-weight-bold">"Los Falconi"</span>
             </q-toolbar-title>
@@ -204,13 +204,13 @@
                     </div>
                     <br/>
                     <div class="row">
-                      <div class="col" align="right">
+                      <div class="col">
                         <q-btn :disabled="!login_email || !login_password" @click="login()" color="green"
                                label="Ingresar" class="full-width"/>
                       </div>
                     </div>
                     <div class="row">
-                      <p style="margin-bottom: 0px; margin-top: 10px;">{{ login_message }}</p>
+                      <p style="margin-bottom: 0; margin-top: 10px;">{{ login_message }}</p>
                     </div>
                   </q-form>
                 </div>
@@ -221,7 +221,7 @@
                     <q-separator style="border-top: 1px dashed; background: white !important;;" color="green"/>
                   </div>
                   <div class="row">
-                    <div class="col" align="right">
+                    <div class="col">
                       <p style="margin: 0"><a href="">Olvidé mi contraseña</a></p>
                     </div>
                   </div>
@@ -249,13 +249,13 @@
               <div class="row">
                 <div class="col" style="min-width: 256px;">
                   <div class="row">
-                    <div class="col" align="right">
+                    <div class="col">
                       <q-btn @click="logout()" color="black"
                              label="Salir" class="full-width"/>
                     </div>
                   </div>
                   <div class="row">
-                    <p style="margin-bottom: 0px; margin-top: 10px;">{{ login_message }}</p>
+                    <p style="margin-bottom: 0; margin-top: 10px;">{{ login_message }}</p>
                   </div>
                 </div>
               </div>
@@ -303,7 +303,7 @@
                     </div>
                     <br/>
                     <div class="row">
-                      <div class="col" align="right">
+                      <div class="col">
                         <q-btn :disabled="!user_displayname || !user_password || !user_password_confirm ||
                         user_password !== user_password_confirm" @click="updateProfile()" color="green"
                                label="Actualizar" class="full-width"/>
@@ -356,7 +356,7 @@ export default {
       login_password: undefined,
       login_message: "",
       es_usuario: false,
-      usuario: undefined,
+      usuario: "",
       user_displayname: undefined,
       user_password: undefined,
       user_password_confirm: undefined,
@@ -437,7 +437,7 @@ export default {
 
     }
   },
-  beforeCreate() {
+  created() {
     firebase.auth().onAuthStateChanged(user => {
       if (user) {
         this.es_usuario = true;

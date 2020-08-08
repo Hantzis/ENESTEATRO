@@ -11,7 +11,7 @@
         <q-btn color="primary" @click="getRamos()">
           <q-icon left dense size="2em" name="mdi-sync" style="margin-right: -10px; margin-left: -10px;"/>
         </q-btn>
-        <q-btn v-if="es_usuario" style="margin-left: 8px;" color="green" @click="addRamoDialog()">
+        <q-btn v-if="es_usuario && es_admin" style="margin-left: 8px;" color="green" @click="addRamoDialog()">
           <q-icon left size="2em" name="mdi-plus"/>
           <div>Nuevo Ramo</div>
         </q-btn>
@@ -36,7 +36,7 @@
           </template>
           <template v-slot:body-cell-actions="props">
             <q-td :props="props">
-              <div v-if="es_usuario">
+              <div v-if="es_usuario && es_admin">
                 <q-btn dense round flat color="primary" @click="editRamoDialog(props)" icon="edit"></q-btn>
                 <q-btn dense round flat color="red" @click="deleteRamoDialog(props)" icon="delete"></q-btn>
               </div>
@@ -144,6 +144,7 @@ export default {
       ],
       datos_ramos: [],
       es_usuario: false,
+      es_admin: false,
       firebaseRef: firebaseDB.collection('Ramo'),
     }
   },
@@ -195,6 +196,14 @@ export default {
     firebase.auth().onAuthStateChanged(user => {
       if (user) {
         this.es_usuario = true;
+        firebaseDB.collection('Config').doc('usuarios').get().then(resDB => {
+          if (resDB.data().admin.some(x => x === user.email)) {
+            this.es_admin = true
+            console.log("ES ADMIN")
+          } else {
+            console.log("NO ES ADMIN")
+          }
+        })
       } else {
         this.es_usuario = false;
       }
