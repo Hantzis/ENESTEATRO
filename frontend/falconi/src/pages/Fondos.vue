@@ -149,7 +149,7 @@ export default {
   created() {
     this.firebaseRef.onSnapshot({includeMetadataChanges: false}, snapshot => {
       this.tabla_loading = true
-      if (!((snapshot.docs.length == snapshot.docChanges().length) && snapshot.docChanges().length > 1)) {
+      if (!((snapshot.docs.length === snapshot.docChanges().length) && snapshot.docChanges().length > 1)) {
         snapshot.docChanges().forEach(change => {
           this.getFondos()
           if (change.type === "added") {
@@ -204,7 +204,7 @@ export default {
     },
     addFondo() {
       this.tabla_loading = true
-      const add = this.firebaseRef.add({nombre: this.fondo_nombre})
+      this.firebaseRef.add({nombre: this.fondo_nombre})
       this.tabla_loading = false
     },
     updateFondo() {

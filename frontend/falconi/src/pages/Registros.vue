@@ -236,7 +236,7 @@ export default {
   created() {
     this.firebaseRef.onSnapshot({includeMetadataChanges: false}, snapshot => {
       this.tabla_loading = true
-      if (!((snapshot.docs.length == snapshot.docChanges().length) && snapshot.docChanges().length > 1)) {
+      if (!((snapshot.docs.length === snapshot.docChanges().length) && snapshot.docChanges().length > 1)) {
         snapshot.docChanges().forEach(change => {
           this.getRegistros()
           if (change.type === "added") {
@@ -543,12 +543,6 @@ export default {
         }
       }
       if (props.row.transcripcion) this.registro_transcripcion = props.row.transcripcion
-    },
-    filterFn(val, update, abort) {
-      update(() => {
-        const needle = val.toLowerCase()
-        this.options = this.total_options.filter(v => v.label.toLowerCase().indexOf(needle) > -1)
-      })
     },
   }
 }
