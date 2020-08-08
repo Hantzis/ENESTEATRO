@@ -7,19 +7,22 @@
         <q-toolbar-title>
           Los Falconi
         </q-toolbar-title>
-        <!-- {{ todaysDate }}&nbsp;&nbsp;&nbsp; -->
+        <!-- {{ todaysDate }}&nbsp;&nbsp;&nbsp; --> {{ es_usuario }}
         <q-btn dense round flat @click="open_dialog_info = true" icon="info">
-          <q-tooltip content-class="bg-amber text-black shadow-4" self="bottom right" anchor="center left" content-style="font-size: 16px">
+          <q-tooltip content-class="bg-amber text-black shadow-4" self="bottom right" anchor="center left"
+                     content-style="font-size: 16px">
             Info
           </q-tooltip>
         </q-btn>
         <q-btn v-if="!es_usuario" dense round flat @click="open_dialog_login = true" icon="login">
-          <q-tooltip content-class="bg-amber text-black shadow-4" self="bottom right" anchor="center left" content-style="font-size: 16px">
+          <q-tooltip content-class="bg-amber text-black shadow-4" self="bottom right" anchor="center left"
+                     content-style="font-size: 16px">
             Iniciar sesión
           </q-tooltip>
         </q-btn>
         <q-btn v-if="es_usuario" dense round flat @click="open_dialog_logout = true" icon="logout">
-          <q-tooltip content-class="bg-amber text-black shadow-4" self="bottom right" anchor="center left" content-style="font-size: 16px">
+          <q-tooltip content-class="bg-amber text-black shadow-4" self="bottom right" anchor="center left"
+                     content-style="font-size: 16px">
             Cerrar sesión
           </q-tooltip>
         </q-btn>
@@ -101,12 +104,24 @@
       </q-scroll-area>
 
       <q-img class="absolute-top" src="https://cdn.quasar.dev/img/material.png" style="height: 150px">
-        <div class="absolute-bottom bg-transparent">
+        <div v-if="es_usuario" class="absolute-bottom bg-transparent">
           <q-avatar size="56px" class="q-mb-sm">
-            <img :src="get_gravatar('mathereall@gmail.com', 150)">
+            <img :src="get_gravatar(usuario.email, 150)">
           </q-avatar>
-          <div class="text-weight-bold">César Benjamín García Martínez</div>
-          <div>mathereall@gmail.com</div>
+          <div class="text-weight-bold">{{ usuario.displayName }}</div>
+          <div>
+            <a style="cursor: pointer; margin-right: 8px;" @click="open_dialog_profile = true">Mi perfil</a> |
+            <a style="cursor: pointer; margin-left: 8px;" @click="open_dialog_logout = true">Salir</a>
+          </div>
+        </div>
+        <div v-else class="absolute-bottom bg-transparent">
+          <q-avatar size="56px" class="q-mb-sm">
+            <img src="~assets/logo_udir.png">
+          </q-avatar>
+          <div class="text-weight-bold">Anónimo</div>
+          <div>
+            <a style="cursor: pointer;" @click="open_dialog_login = true">Iniciar sesión</a>
+          </div>
         </div>
       </q-img>
     </q-drawer>
@@ -234,15 +249,15 @@
             <div class="col">
               <div class="row">
                 <div class="col" style="min-width: 256px;">
-                    <div class="row">
-                      <div class="col" align="right">
-                        <q-btn @click="logout()" color="black"
-                               label="Salir" class="full-width"/>
-                      </div>
+                  <div class="row">
+                    <div class="col" align="right">
+                      <q-btn @click="logout()" color="black"
+                             label="Salir" class="full-width"/>
                     </div>
-                    <div class="row">
-                      <p style="margin-bottom: 0px; margin-top: 10px;">{{ login_message }}</p>
-                    </div>
+                  </div>
+                  <div class="row">
+                    <p style="margin-bottom: 0px; margin-top: 10px;">{{ login_message }}</p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -251,6 +266,72 @@
         <q-separator/>
         <q-card-actions align="right">
           <q-btn label="Cancelar" color="black" v-close-popup/>
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+    <q-dialog v-model="open_dialog_profile">
+      <q-card>
+        <q-card-section class="row items-center">
+          <q-avatar icon="mdi-account" color="primary" text-color="white"/>
+          <q-toolbar-title>Perfil</q-toolbar-title>
+        </q-card-section>
+        <q-separator/>
+        <q-card-section class="row items-center">
+          <div class="row">
+            <div class="col">
+              <div class="row">
+                <div class="col" style="min-width: 256px;">
+                  <q-form>
+                    <div class="row">
+                      <q-input class="full-width" name="email"
+                               :rules="[val => !!val || 'Falta dirección de correo', isValidEmail]"
+                               v-model="usuario.email" label="Dirección de correo" readonly/>
+                    </div>
+                    <div class="row">
+                      <q-input class="full-width" name="displayname"
+                               :rules="[val => !!val || 'El nombre no puede estar vacío']"
+                               v-model="user_displayname" label="Nombre completo"/>
+                    </div>
+                    <div class="row">
+                      <q-input class="full-width" name="password" v-model="user_password" type="password"
+                               label="Contraseña" :rules="[val => !!val || 'La contraseña no puede estar vacía']"/>
+                    </div>
+                    <div class="row">
+                      <q-input class="full-width" name="password_confirm" v-model="user_password_confirm"
+                               type="password"
+                               label="Confirmar Contraseña"
+                               :rules="[val => !!val || 'La contraseña no puede estar vacía']"/>
+                    </div>
+                    <br/>
+                    <div class="row">
+                      <div class="col" align="right">
+                        <q-btn :disabled="!user_displayname || !user_password || !user_password_confirm ||
+                        user_password !== user_password_confirm" @click="updateProfile()" color="green"
+                               label="Actualizar" class="full-width"/>
+                      </div>
+                    </div>
+                    <div v-if="notSamePasswords" class="row">
+                      <p style="margin-bottom: 0px; margin-top: 10px;">Las contraseñas no coinciden.</p>
+                    </div>
+                  </q-form>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col q-pt-sm">
+                  <div class="row q-py-sm">
+                  </div>
+                  <div class="row">
+                    <div class="col" align="right">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </q-card-section>
+        <q-separator/>
+        <q-card-actions align="right">
+          <q-btn label="Cancelar" color="grey-10" v-close-popup/>
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -271,22 +352,32 @@ export default {
       open_dialog_info: false,
       open_dialog_login: false,
       open_dialog_logout: false,
+      open_dialog_profile: false,
       login_email: undefined,
       login_password: undefined,
       login_message: "",
-      es_usuario: false
+      es_usuario: false,
+      usuario: undefined,
+      user_displayname: undefined,
+      user_password: undefined,
+      user_password_confirm: undefined,
     }
   },
   computed: {
     todaysDate() {
       let timeStamp = Date.now()
       return date.formatDate(timeStamp, 'YYYY-MM-DD')
-    }
-  },
-  watch: {
-    login_email() {
-      this.login_message = ""
-    }
+    },
+    notSamePasswords() {
+      if (this.passwordsFilled) {
+        return (this.user_password !== this.user_password_confirm)
+      } else {
+        return false
+      }
+    },
+    passwordsFilled() {
+      return (this.user_password !== '' && this.user_password_confirm !== '')
+    },
   },
   methods: {
     isValidEmail(val) {
@@ -299,16 +390,14 @@ export default {
     },
     login() {
       firebase.auth().signInWithEmailAndPassword(this.login_email, this.login_password).then(response => {
-        console.log(response)
         if (response.operationType === "signIn") {
           this.login_message = "Bienvenido."
           setTimeout(() => {
             this.open_dialog_login = false
             this.login_message = ""
-            this.es_usuario = true
             this.login_email = undefined
             this.login_password = undefined
-          }, 100)
+          }, 200)
         }
       }).catch(error => {
         console.log(error)
@@ -324,14 +413,41 @@ export default {
       firebase.auth().signOut().then(response => {
         this.login_message = "Adios."
         setTimeout(() => {
-            this.open_dialog_logout = false
-            this.login_message = ""
-            this.es_usuario = false
-          }, 100)
+          this.open_dialog_logout = false
+          this.login_message = ""
+        }, 100)
       }).catch(error => {
         console.log(error)
       })
     },
+    updateProfile() {
+      this.usuario.updateProfile({
+        displayName: this.user_displayname
+      }).then(res => {
+        this.usuario.updatePassword(this.user_password).then(res => {
+          this.user_password = undefined
+          this.user_password_confirm = undefined
+        }).catch(function (error) {
+          console.log(error)
+        });
+      }).catch(function (error) {
+        console.log(error)
+      }).finally(() => {
+        this.open_dialog_profile = false
+      });
+
+    }
+  },
+  beforeCreate() {
+    firebase.auth().onAuthStateChanged(user => {
+      if (user) {
+        this.es_usuario = true;
+        this.usuario = user;
+        this.user_displayname = user.displayName
+      } else {
+        this.es_usuario = false;
+      }
+    });
   }
 }
 </script>

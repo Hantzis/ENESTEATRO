@@ -22,26 +22,113 @@
         <q-table
           title="Registros"
           :data.sync="datos_registros"
-          :columns="columns"
+          :columns="columnas"
+          :visible-columns="visible_columnas"
           row-key="id"
           :grid1="$q.screen.xs"
           :loading="tabla_loading"
           :filter="filter"
         >
           <template v-slot:top-right>
-            <q-input borderless dense debounce="300" v-model="filter" placeholder="Buscar">
+            <q-input borderless dense debounce="300" v-model="filter" placeholder="Buscar" style="margin-right: 12px;">
               <template v-slot:append>
                 <q-icon name="search"/>
               </template>
             </q-input>
+            <q-select
+              v-model="visible_columnas"
+              multiple
+              outlined
+              dense
+              options-dense
+              :display-value="$q.lang.table.columns"
+              emit-value
+              map-options
+              :options="columnas"
+              option-value="name"
+              options-cover
+              style="min-width: 150px"
+            />
+
           </template>
-          <template v-slot:body-cell-actions="props">
-            <q-td :props="props">
-              <q-btn dense round flat color="accent" @click="editRegistroDialog(props)" icon="mdi-plus"></q-btn>
-              <q-btn dense round flat color="primary" @click="editRegistroDialog(props)" icon="edit"></q-btn>
-              <q-btn dense round flat color="red" @click="deleteRegistroDialog(props)" icon="delete"></q-btn>
-            </q-td>
+
+          <template v-slot:header="props">
+            <q-tr :props="props">
+              <q-th
+                v-for="col of props.cols"
+                :key="col.name"
+                :props="props"
+              >
+                {{ col.label }}
+              </q-th>
+            </q-tr>
           </template>
+
+          <template v-slot:header="props">
+            <q-tr :props="props">
+
+              <q-th
+                v-for="col in props.cols"
+                :key="col.name"
+                :props="props"
+              >
+                {{ col.label }}
+              </q-th>
+              <q-th auto-width/>
+            </q-tr>
+          </template>
+
+          <template v-slot:body="props">
+            <q-tr :props="props">
+              <q-td
+                v-for="col in props.cols"
+                :key="col.name"
+                :props="props"
+              >
+                {{ col.value }}
+              </q-td>
+              <q-td auto-width>
+                <q-btn dense round flat color="accent" @click="props.expand = !props.expand"
+                       :icon="props.expand ? 'remove' : 'add'"></q-btn>
+                <q-btn dense round flat color="primary" @click="editRegistroDialog(props)" icon="edit"></q-btn>
+                <q-btn dense round flat color="red" @click="deleteRegistroDialog(props)" icon="delete"></q-btn>
+              </q-td>
+            </q-tr>
+            <q-tr v-show="props.expand" :props="props">
+              <q-td colspan="100%">
+                <div class="text-left">
+                  <q-tr>
+                    <q-td>Encabezados</q-td>
+                    <q-td>
+                      <q-tr v-for="enc of props.row.encabezados.split(' / ')" :key="enc">
+                        <q-td style="height: initial; border-bottom-width: 0;">{{ enc }}</q-td>
+                      </q-tr>
+                    </q-td>
+                  </q-tr>
+                  <q-tr>
+                    <q-td>Notas</q-td>
+                    <q-td>
+                      <q-tr v-for="enc of props.row.notas.split(' / ')" :key="enc">
+                        <q-td style="height: initial; border-bottom-width: 0;">{{ enc }}</q-td>
+                      </q-tr>
+                    </q-td>
+                  </q-tr>
+                  <q-tr>
+                    <q-td>Transcripción</q-td>
+                    <q-td>
+                      <q-tr>
+                        <q-td style="height: initial; border-bottom-width: 0;">
+                          <pre>{{ props.row.transcripcion }}</pre>
+                        </q-td>
+                      </q-tr>
+                    </q-td>
+                  </q-tr>
+                </div>
+              </q-td>
+            </q-tr>
+          </template>
+
+
         </q-table>
       </div>
     </div>
@@ -181,6 +268,7 @@
 
 <script>
 import firebaseDB from "boot/firebase"
+import firebase from "firebase";
 
 export default {
   name: 'Registros',
@@ -205,7 +293,8 @@ export default {
       registro_transcripcion: undefined,
       registro_usuario: undefined,
       registro_id: undefined,
-      columns: [
+      columnas: [
+        {name: 'id', align: 'left', label: 'ID', field: 'id', sortable: true},
         {name: 'archivo', align: 'left', label: 'Archivo', field: 'archivo', sortable: true},
         {name: 'fondo', align: 'left', label: 'Fondo', field: 'fondo', sortable: true},
         {name: 'libro', align: 'left', label: 'Libro', field: 'libro', sortable: true},
@@ -215,20 +304,22 @@ export default {
         {name: 'años', align: 'left', label: 'Años', field: 'años', sortable: true},
         {name: 'lugar', align: 'left', label: 'Lugar', field: 'lugar', sortable: true},
         {name: 'ramo', align: 'left', label: 'Ramo', field: 'ramo', sortable: true},
-        {name: 'encabezados', align: 'left', label: 'Encabezados', field: 'encabezados', sortable: true},
-        {name: 'notas', align: 'left', label: 'Notas', field: 'notas', sortable: true},
-        {name: 'transcripcion', align: 'left', label: 'Transcripción', field: 'transcripcion', sortable: true},
         {name: 'usuario', align: 'left', label: 'Usuario', field: 'usuario', sortable: true},
-        {name: 'actions', label: '', field: 'actions', align: 'right'},
+        {name: 'encabezados', align: 'left', label: 'encabezados', field: 'encabezados', sortable: true},
+        {name: 'notas', align: 'left', label: 'notas', field: 'notas', sortable: true},
+        {name: 'transcripcion', align: 'left', label: 'transcripcion', field: 'transcripcion', sortable: true},
       ],
+      visible_columnas: ['archivo', 'fondo', 'libro', 'foja', 'años', 'lugar', 'ramo', 'usuario'],
       archivos: undefined,
       fondos: undefined,
       lugares: undefined,
       ramos: undefined,
       datos_registros: [],
+      es_usuario: false,
       firebaseRef: firebaseDB.collection('Registro'),
     }
   },
+  computed: {},
   mounted() {
     this.getCampos()
     this.getRegistros()
@@ -236,7 +327,7 @@ export default {
   created() {
     this.firebaseRef.onSnapshot({includeMetadataChanges: false}, snapshot => {
       this.tabla_loading = true
-      if (!((snapshot.docs.length === snapshot.docChanges().length) && snapshot.docChanges().length > 1)) {
+      if ((!(snapshot.docs.length === snapshot.docChanges().length) && snapshot.docChanges().length === 1)) {
         snapshot.docChanges().forEach(change => {
           this.getRegistros()
           if (change.type === "added") {
@@ -285,6 +376,15 @@ export default {
     }, () => {
       console.log("Complete")
     })
+  },
+  beforeCreate() {
+    firebase.auth().onAuthStateChanged(user => {
+      if (user) {
+        this.es_usuario = true;
+      } else {
+        this.es_usuario = false;
+      }
+    });
   },
   methods: {
     getArchivos() {
@@ -407,21 +507,6 @@ export default {
       if (this.registro_notas) data_registro['notas'] = this.registro_notas
       if (this.registro_transcripcion) data_registro['transcripcion'] = this.registro_transcripcion
       firebaseDB.collection('Registro').add(data_registro)
-
-        /* .then(response => {
-        this.$q.notify({
-          type: 'info',
-          textColor: 'grey-10',
-          multiLine: true,
-          message: `Se agregó el nuevo registro con ID ${response.id}`,
-          timeout: 2000
-        })
-      }).catch(error => {
-        console.log(error)
-      }).finally(() => {
-        this.limpiar_campos()
-        this.getRegistros()
-      }) */
     },
     updateRegistro() {
       const data_registro = {}
@@ -438,37 +523,9 @@ export default {
       if (this.registro_notas) data_registro['notas'] = this.registro_notas
       if (this.registro_transcripcion) data_registro['transcripcion'] = this.registro_transcripcion
       firebaseDB.collection('Registro').doc(this.registro_id).update(data_registro)
-        /*.then(() => {
-        this.$q.notify({
-          type: 'info',
-          textColor: 'grey-10',
-          multiLine: true,
-          message: `Se modificó el registro con ID ${this.editar_registro_id}`,
-          timeout: 2000
-        })
-      }).catch(error => {
-        console.log(error)
-      }).finally(() => {
-        this.limpiar_campos()
-        this.getRegistros()
-      })*/
     },
     deleteRegistro() {
       firebaseDB.collection('Registro').doc(this.eliminar_registro_id).delete()
-
-      /*.then(() => {
-        this.$q.notify({
-          type: 'negative',
-          multiLine: true,
-          message: `Se eliminó el registro "${this.eliminar_registro_id}"`,
-          timeout: 2000
-        })
-      }).catch(error => {
-        console.log(error)
-      }).finally(() => {
-        this.limpiar_campos()
-        this.getRegistros()
-      }) */
     },
     limpiar_campos() {
       this.registro_archivo = undefined

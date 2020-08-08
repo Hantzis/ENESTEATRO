@@ -8,10 +8,10 @@
     </div>
     <div class="row" style="padding-bottom: 10px;">
       <div class="col" :align="'right'">
-        <q-btn color="primary" style="margin-right: 12px;" @click="getRamos()">
+        <q-btn color="primary" @click="getRamos()">
           <q-icon left dense size="2em" name="mdi-sync" style="margin-right: -10px; margin-left: -10px;"/>
         </q-btn>
-        <q-btn color="green" @click="addRamoDialog()">
+        <q-btn v-if="es_usuario" style="margin-left: 8px;" color="green" @click="addRamoDialog()">
           <q-icon left size="2em" name="mdi-plus"/>
           <div>Nuevo Ramo</div>
         </q-btn>
@@ -36,8 +36,10 @@
           </template>
           <template v-slot:body-cell-actions="props">
             <q-td :props="props">
-              <q-btn dense round flat color="primary" @click="editRamoDialog(props)" icon="edit"></q-btn>
-              <q-btn dense round flat color="red" @click="deleteRamoDialog(props)" icon="delete"></q-btn>
+              <div v-if="es_usuario">
+                <q-btn dense round flat color="primary" @click="editRamoDialog(props)" icon="edit"></q-btn>
+                <q-btn dense round flat color="red" @click="deleteRamoDialog(props)" icon="delete"></q-btn>
+              </div>
             </q-td>
           </template>
         </q-table>
@@ -122,6 +124,7 @@
 
 <script>
 import firebaseDB from "boot/firebase"
+import firebase from "firebase";
 
 
 export default {
@@ -140,6 +143,7 @@ export default {
         {name: 'actions', label: '', field: 'actions', align: 'right'},
       ],
       datos_ramos: [],
+      es_usuario: false,
       firebaseRef: firebaseDB.collection('Ramo'),
     }
   },
@@ -149,7 +153,7 @@ export default {
   created() {
     this.firebaseRef.onSnapshot({includeMetadataChanges: false}, snapshot => {
       this.tabla_loading = true
-      if (!((snapshot.docs.length === snapshot.docChanges().length) && snapshot.docChanges().length > 1)) {
+      if ((!(snapshot.docs.length === snapshot.docChanges().length) && snapshot.docChanges().length === 1)) {
         snapshot.docChanges().forEach(change => {
           this.getRamos()
           if (change.type === "added") {
@@ -186,6 +190,15 @@ export default {
     }, () => {
       console.log("Complete")
     })
+  },
+  beforeCreate() {
+    firebase.auth().onAuthStateChanged(user => {
+      if (user) {
+        this.es_usuario = true;
+      } else {
+        this.es_usuario = false;
+      }
+    });
   },
   methods: {
     getRamos() {
