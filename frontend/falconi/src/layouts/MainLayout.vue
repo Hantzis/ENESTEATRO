@@ -7,7 +7,7 @@
         <q-toolbar-title>
           Los Falconi
         </q-toolbar-title>
-        <!-- {{ todaysDate }}&nbsp;&nbsp;&nbsp; --> {{ es_usuario }}
+        <!-- {{ todaysDate }}&nbsp;&nbsp;&nbsp; -->
         <q-btn dense round flat @click="open_dialog_info = true" icon="info">
           <q-tooltip content-class="bg-amber text-black shadow-4" self="bottom right" anchor="center left"
                      content-style="font-size: 16px">
