@@ -271,6 +271,8 @@
 <script>
 import firebaseDB from "boot/firebase"
 import firebase from "firebase";
+import {date} from 'quasar'
+
 
 export default {
   name: 'Registros',
@@ -306,12 +308,15 @@ export default {
         {name: 'años', align: 'left', label: 'Años', field: 'años', sortable: true},
         {name: 'lugar', align: 'left', label: 'Lugar', field: 'lugar', sortable: true},
         {name: 'ramo', align: 'left', label: 'Ramo', field: 'ramo', sortable: true},
-        {name: 'usuario', align: 'left', label: 'Usuario', field: 'usuario', sortable: true},
+        {name: 'crea', align: 'left', label: 'Crea', field: 'crea', sortable: true},
+        {name: 'creacion', align: 'left', label: 'Creación', field: 'creacion', sortable: true},
+        {name: 'actualiza', align: 'left', label: 'Actualiza', field: 'actualiza', sortable: true},
+        {name: 'actualizacion', align: 'left', label: 'Actualización', field: 'actualizacion', sortable: true},
         {name: 'encabezados', align: 'left', label: 'encabezados', field: 'encabezados', sortable: true},
         {name: 'notas', align: 'left', label: 'notas', field: 'notas', sortable: true},
         {name: 'transcripcion', align: 'left', label: 'transcripcion', field: 'transcripcion', sortable: true},
       ],
-      visible_columnas: ['archivo', 'fondo', 'libro', 'foja', 'años', 'lugar', 'ramo', 'usuario'],
+      visible_columnas: ['archivo', 'fondo', 'libro', 'foja', 'años', 'lugar', 'ramo', 'crea'],
       archivos: undefined,
       fondos: undefined,
       lugares: undefined,
@@ -319,10 +324,17 @@ export default {
       datos_registros: [],
       es_usuario: false,
       es_admin: false,
+      usuario: "",
+      user_displayname: "",
       firebaseRef: firebaseDB.collection('Registro'),
     }
   },
-  computed: {},
+  computed: {
+    todaysDate() {
+      let timeStamp = Date.now()
+      return date.formatDate(timeStamp, 'YYYY-MM-DD')
+    }
+  },
   mounted() {
     this.getCampos()
     this.getRegistros()
@@ -384,6 +396,8 @@ export default {
     firebase.auth().onAuthStateChanged(user => {
       if (user) {
         this.es_usuario = true;
+        this.usuario = user;
+        this.user_displayname = user.displayName
       } else {
         this.es_usuario = false;
       }
@@ -484,7 +498,10 @@ export default {
             encabezados: encabezados,
             notas: notas,
             transcripcion: res.data().transcripcion,
-            usuario: res.data().usuario,
+            crea: res.data().crea,
+            creacion: res.data().creacion,
+            actualiza: res.data().actualiza,
+            actualizacion: res.data().actualizacion,
           };
           this.datos_registros.push(registro);
         });
@@ -509,6 +526,9 @@ export default {
       if (this.registro_encabezados) data_registro['encabezados'] = this.registro_encabezados
       if (this.registro_notas) data_registro['notas'] = this.registro_notas
       if (this.registro_transcripcion) data_registro['transcripcion'] = this.registro_transcripcion
+      data_registro['crea'] = this.user_displayname
+      data_registro['creacion'] = date.formatDate(Date.now(), 'YYYY-MM-DD')
+
       firebaseDB.collection('Registro').add(data_registro)
     },
     updateRegistro() {
@@ -525,6 +545,8 @@ export default {
       if (this.registro_encabezados) data_registro['encabezados'] = this.registro_encabezados
       if (this.registro_notas) data_registro['notas'] = this.registro_notas
       if (this.registro_transcripcion) data_registro['transcripcion'] = this.registro_transcripcion
+      data_registro['actualiza'] = this.user_displayname
+      data_registro['actualizacion'] = date.formatDate(Date.now(), 'YYYY-MM-DD')
       firebaseDB.collection('Registro').doc(this.registro_id).update(data_registro)
     },
     deleteRegistro() {
