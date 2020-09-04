@@ -25,7 +25,6 @@
           :columns="columnas"
           :visible-columns="visible_columnas"
           row-key="id"
-          :grid1="$q.screen.xs"
           :loading="tabla_loading"
           :filter="filter"
         >
@@ -41,7 +40,7 @@
               outlined
               dense
               options-dense
-              :display-value="$q.lang.table.columns"
+              :display-value="$q.lang.table.columnas"
               emit-value
               map-options
               :options="columnas"
@@ -100,18 +99,10 @@
               <q-td colspan="100%">
                 <div class="text-left">
                   <q-tr>
-                    <q-td>Encabezados</q-td>
+                    <q-td>Encabezado</q-td>
                     <q-td>
-                      <q-tr v-for="enc of props.row.encabezados.split(' / ')" :key="enc">
-                        <q-td style="height: initial; border-bottom-width: 0;">{{ enc }}</q-td>
-                      </q-tr>
-                    </q-td>
-                  </q-tr>
-                  <q-tr>
-                    <q-td>Notas</q-td>
-                    <q-td>
-                      <q-tr v-for="enc of props.row.notas.split(' / ')" :key="enc">
-                        <q-td style="height: initial; border-bottom-width: 0;">{{ enc }}</q-td>
+                      <q-tr>
+                        <q-td style="height: initial; border-bottom-width: 0;">{{ props.row.encabezado }}</q-td>
                       </q-tr>
                     </q-td>
                   </q-tr>
@@ -121,6 +112,26 @@
                       <q-tr>
                         <q-td style="height: initial; border-bottom-width: 0;">
                           <pre>{{ props.row.transcripcion }}</pre>
+                        </q-td>
+                      </q-tr>
+                    </q-td>
+                  </q-tr>
+                  <q-tr>
+                    <q-td>Observaciones</q-td>
+                    <q-td>
+                      <q-tr>
+                        <q-td style="height: initial; border-bottom-width: 0;">
+                          <pre>{{ props.row.observaciones }}</pre>
+                        </q-td>
+                      </q-tr>
+                    </q-td>
+                  </q-tr>
+                  <q-tr v-if="es_usuario">
+                    <q-td>Notas</q-td>
+                    <q-td>
+                      <q-tr>
+                        <q-td style="height: initial; border-bottom-width: 0;">
+                          <pre>{{ props.row.notas }}</pre>
                         </q-td>
                       </q-tr>
                     </q-td>
@@ -155,12 +166,13 @@
                         hide-dropdown-icon input-debounce="0" new-value-mode="add-unique"/>
               <q-select clearable name="lugar" label="Lugar" :options="lugares" v-model="registro_lugar"/>
               <q-select clearable name="ramo" label="Ramo" :options="ramos" v-model="registro_ramo"/>
-              <q-select clearable name="encabezados" label="Encabezados" v-model="registro_encabezados" use-input
-                        use-chips multiple hide-dropdown-icon input-debounce="0" new-value-mode="add-unique"/>
-              <q-select clearable name="notas" label="Notas" v-model="registro_notas" use-input use-chips multiple
-                        hide-dropdown-icon input-debounce="0" new-value-mode="add-unique"/>
+              <q-input clearable name="encabezado" label="Encabezado" v-model="registro_encabezado"/>
               <q-input clearable name="transcripcion" label="Transcripción" type="textarea" rows="1" autogrow
                        v-model="registro_transcripcion"/>
+              <q-input clearable name="observaciones" label="Observaciones" type="textarea"
+                       rows="1" autogrow v-model="registro_transcripcion"/>
+              <q-input clearable name="notas" label="Notas" type="textarea"
+                       rows="1" autogrow v-model="registro_transcripcion"/>
             </div>
           </div>
         </q-card-section>
@@ -194,12 +206,13 @@
                         hide-dropdown-icon input-debounce="0" new-value-mode="add-unique"/>
               <q-select clearable name="lugar" label="Lugar" :options="lugares" v-model="registro_lugar"/>
               <q-select clearable name="ramo" label="Ramo" :options="ramos" v-model="registro_ramo"/>
-              <q-select clearable name="encabezados" label="Encabezados" v-model="registro_encabezados" use-input
-                        use-chips multiple hide-dropdown-icon input-debounce="0" new-value-mode="add-unique"/>
-              <q-select clearable name="notas" label="Notas" v-model="registro_notas" use-input use-chips multiple
-                        hide-dropdown-icon input-debounce="0" new-value-mode="add-unique"/>
+              <q-input clearable name="encabezado" label="Encabezado" v-model="registro_encabezado"/>
               <q-input clearable name="transcripcion" label="Transcripción" type="textarea" rows="1" autogrow
                        v-model="registro_transcripcion"/>
+              <q-input clearable name="observaciones" label="Observaciones" type="textarea"
+                       rows="1" autogrow v-model="registro_transcripcion"/>
+              <q-input clearable name="notas" label="Notas" type="textarea"
+                       rows="1" autogrow v-model="registro_transcripcion"/>
             </div>
           </div>
         </q-card-section>
@@ -246,15 +259,18 @@
                         v-model="registro_lugar"/>
               <q-select v-if="registro_ramo" readonly name="ramo" label="Ramo" :options="ramos"
                         v-model="registro_ramo"/>
-              <q-select v-if="registro_encabezados" readonly name="encabezados" label="Encabezados"
-                        v-model="registro_encabezados" use-input
-                        use-chips multiple hide-dropdown-icon input-debounce="0" new-value-mode="add-unique"/>
-              <q-select v-if="registro_notas" readonly name="notas" label="Notas" v-model="registro_notas" use-input
-                        use-chips multiple
-                        hide-dropdown-icon input-debounce="0" new-value-mode="add-unique"/>
+              <q-input v-if="registro_encabezado" readonly name="encabezado" label="Encabezado"
+                       v-model="registro_encabezado"/>
               <q-input v-if="registro_transcripcion" readonly name="transcripcion" label="Transcripción" type="textarea"
                        rows="1" autogrow
                        v-model="registro_transcripcion"/>
+              <q-input v-if="registro_transcripcion" readonly name="observaciones" label="Observaciones" type="textarea"
+                       rows="1" autogrow
+                       v-model="registro_transcripcion"/>
+              <q-input v-if="registro_transcripcion" readonly name="notas" label="Notas" type="textarea"
+                       rows="1" autogrow
+                       v-model="registro_transcripcion"/>
+
             </div>
           </div>
         </q-card-section>
@@ -292,8 +308,9 @@ export default {
       registro_anos: undefined,
       registro_lugar: undefined,
       registro_ramo: undefined,
-      registro_encabezados: undefined,
+      registro_encabezado: undefined,
       registro_notas: undefined,
+      registro_observaciones: undefined,
       registro_transcripcion: undefined,
       registro_usuario: undefined,
       registro_id: undefined,
@@ -308,13 +325,12 @@ export default {
         {name: 'años', align: 'left', label: 'Años', field: 'años', sortable: true},
         {name: 'lugar', align: 'left', label: 'Lugar', field: 'lugar', sortable: true},
         {name: 'ramo', align: 'left', label: 'Ramo', field: 'ramo', sortable: true},
-        {name: 'crea', align: 'left', label: 'Crea', field: 'crea', sortable: true},
         {name: 'creacion', align: 'left', label: 'Creación', field: 'creacion', sortable: true},
         {name: 'actualiza', align: 'left', label: 'Actualiza', field: 'actualiza', sortable: true},
         {name: 'actualizacion', align: 'left', label: 'Actualización', field: 'actualizacion', sortable: true},
-        {name: 'encabezados', align: 'left', label: 'encabezados', field: 'encabezados', sortable: true},
-        {name: 'notas', align: 'left', label: 'notas', field: 'notas', sortable: true},
-        {name: 'transcripcion', align: 'left', label: 'transcripcion', field: 'transcripcion', sortable: true},
+        {name: 'encabezado', align: 'left', label: 'Encabezado', field: 'encabezado', sortable: true},
+        {name: 'transcripcion', align: 'left', label: 'Transcripcion', field: 'transcripcion', sortable: true},
+        {name: 'observaciones', align: 'left', label: 'Observaciones', field: 'observaciones', sortable: true},
       ],
       visible_columnas: ['archivo', 'fondo', 'libro', 'foja', 'años', 'lugar', 'ramo', 'crea'],
       archivos: undefined,
@@ -380,8 +396,9 @@ export default {
       this.registro_anos = undefined
       this.registro_lugar = undefined
       this.registro_ramo = undefined
-      this.registro_encabezados = undefined
+      this.registro_encabezado = undefined
       this.registro_notas = undefined
+      this.registro_observaciones = undefined
       this.registro_transcripcion = undefined
       this.registro_usuario = undefined
       this.registro_id = undefined
@@ -398,8 +415,14 @@ export default {
         this.es_usuario = true;
         this.usuario = user;
         this.user_displayname = user.displayName
+        this.columnas.push(
+          {name: 'notas', align: 'left', label: 'Notas', field: 'notas', sortable: true}
+        )
       } else {
         this.es_usuario = false;
+        if (this.columnas[this.columnas.length - 1].name === 'notas') {
+          this.columnas.pop()
+        }
       }
     });
   },
@@ -472,14 +495,6 @@ export default {
           if (res.data().años) {
             years = res.data().años.join(", ")
           }
-          let encabezados = "";
-          if (res.data().encabezados) {
-            let arr_encanezados = []
-            for (let i of res.data().encabezados) {
-              arr_encanezados.push('"' + i + '"')
-            }
-            encabezados = arr_encanezados.join(" / ")
-          }
           let notas = "";
           if (res.data().notas) {
             notas = res.data().notas.join(" / ")
@@ -495,7 +510,7 @@ export default {
             años: years,
             lugar: res.data().lugar,
             ramo: res.data().ramo,
-            encabezados: encabezados,
+            encabezado: res.data().encabezado,
             notas: notas,
             transcripcion: res.data().transcripcion,
             crea: res.data().crea,
@@ -523,8 +538,9 @@ export default {
       if (this.registro_anos) data_registro['años'] = this.registro_anos
       if (this.registro_lugar) data_registro['lugar'] = this.registro_lugar
       if (this.registro_ramo) data_registro['ramo'] = this.registro_ramo
-      if (this.registro_encabezados) data_registro['encabezados'] = this.registro_encabezados
+      if (this.registro_encabezado) data_registro['encabezado'] = this.registro_encabezado
       if (this.registro_notas) data_registro['notas'] = this.registro_notas
+      if (this.registro_observaciones) data_registro['observaciones'] = this.registro_observaciones
       if (this.registro_transcripcion) data_registro['transcripcion'] = this.registro_transcripcion
       data_registro['crea'] = this.user_displayname
       data_registro['creacion'] = date.formatDate(Date.now(), 'YYYY-MM-DD')
@@ -542,8 +558,9 @@ export default {
       if (this.registro_anos) data_registro['años'] = this.registro_anos
       if (this.registro_lugar) data_registro['lugar'] = this.registro_lugar
       if (this.registro_ramo) data_registro['ramo'] = this.registro_ramo
-      if (this.registro_encabezados) data_registro['encabezados'] = this.registro_encabezados
+      if (this.registro_encabezado) data_registro['encabezado'] = this.registro_encabezado
       if (this.registro_notas) data_registro['notas'] = this.registro_notas
+      if (this.registro_observaciones) data_registro['observaciones'] = this.registro_observaciones
       if (this.registro_transcripcion) data_registro['transcripcion'] = this.registro_transcripcion
       data_registro['actualiza'] = this.user_displayname
       data_registro['actualizacion'] = date.formatDate(Date.now(), 'YYYY-MM-DD')
@@ -562,8 +579,9 @@ export default {
       this.registro_anos = undefined
       this.registro_lugar = undefined
       this.registro_ramo = undefined
-      this.registro_encabezados = undefined
+      this.registro_encabezado = undefined
       this.registro_notas = undefined
+      this.registro_observaciones = undefined
       this.registro_transcripcion = undefined
       this.registro_usuario = undefined
     },
@@ -582,20 +600,9 @@ export default {
       if (props.row.años) this.registro_anos = props.row.años.split(", ")
       if (props.row.lugar) this.registro_lugar = props.row.lugar
       if (props.row.ramo) this.registro_ramo = props.row.ramo
-      if (props.row.encabezados) {
-        this.registro_encabezados = []
-        let arr_encabezados = props.row.encabezados.split(" / ")
-        for (let i of arr_encabezados) {
-          this.registro_encabezados.push(i.substring(1, i.length - 1))
-        }
-      }
-      if (props.row.notas) {
-        this.registro_notas = []
-        let arr_notas = props.row.notas.split(" / ")
-        for (let i of arr_notas) {
-          this.registro_notas.push(i.substring(1, i.length - 1))
-        }
-      }
+      if (props.row.encabezado) this.registro_encabezado = props.row.encabezado
+      if (props.row.notas) this.registro_notas = props.row.notas
+      if (props.row.observaciones) this.registro_observaciones = props.row.observaciones
       if (props.row.transcripcion) this.registro_transcripcion = props.row.transcripcion
     },
     deleteRegistroDialog(props) {
@@ -610,22 +617,11 @@ export default {
       if (props.row.años) this.registro_anos = props.row.años.split(", ")
       if (props.row.lugar) this.registro_lugar = props.row.lugar
       if (props.row.ramo) this.registro_ramo = props.row.ramo
-      if (props.row.encabezados) {
-        this.registro_encabezados = []
-        let arr_encabezados = props.row.encabezados.split(" / ")
-        for (let i of arr_encabezados) {
-          this.registro_encabezados.push(i.substring(1, i.length - 1))
-        }
-      }
-      if (props.row.notas) {
-        this.registro_notas = []
-        let arr_notas = props.row.notas.split(" / ")
-        for (let i of arr_notas) {
-          this.registro_notas.push(i.substring(1, i.length - 1))
-        }
-      }
+      if (props.row.encabezado) this.registro_encabezado = props.row.encabezado
+      if (props.row.notas) this.registro_notas = props.row.notas
+      if (props.row.observaciones) this.registro_observaciones = props.row.observaciones
       if (props.row.transcripcion) this.registro_transcripcion = props.row.transcripcion
-    },
+    }
   }
 }
 </script>
