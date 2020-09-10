@@ -11,7 +11,7 @@
         <q-btn color="primary" @click="getLugares()">
           <q-icon left dense size="2em" name="mdi-sync" style="margin-right: -10px; margin-left: -10px;"/>
         </q-btn>
-        <q-btn v-if="es_usuario && es_admin" style="margin-left: 8px;" color="green" @click="addLugarDialog()">
+        <q-btn v-if="es_usuario" style="margin-left: 8px;" color="green" @click="addLugarDialog()">
           <q-icon left size="2em" name="mdi-plus"/>
           <div>Nuevo Lugar</div>
         </q-btn>

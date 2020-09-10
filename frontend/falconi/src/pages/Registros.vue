@@ -40,7 +40,8 @@
               outlined
               dense
               options-dense
-              :display-value="$q.lang.table.columnas"
+              :display-value1="$q.lang.table.columnas"
+              display-value="Mostrar columnas..."
               emit-value
               map-options
               :options="columnas"
@@ -48,24 +49,12 @@
               options-cover
               style="min-width: 150px"
             />
-
           </template>
+
+
 
           <template v-slot:header="props">
             <q-tr :props="props">
-              <q-th
-                v-for="col of props.cols"
-                :key="col.name"
-                :props="props"
-              >
-                {{ col.label }}
-              </q-th>
-            </q-tr>
-          </template>
-
-          <template v-slot:header="props">
-            <q-tr :props="props">
-
               <q-th
                 v-for="col in props.cols"
                 :key="col.name"
@@ -79,13 +68,7 @@
 
           <template v-slot:body="props">
             <q-tr :props="props">
-              <q-td
-                v-for="col in props.cols"
-                :key="col.name"
-                :props="props"
-              >
-                {{ col.value }}
-              </q-td>
+              <q-td v-for="col in props.cols" :key="col.name" :props="props">{{ col.value }}</q-td>
               <q-td auto-width>
                 <q-btn dense round flat color="accent" @click="props.expand = !props.expand"
                        :icon="props.expand ? 'remove' : 'add'"></q-btn>
@@ -141,7 +124,6 @@
             </q-tr>
           </template>
 
-
         </q-table>
       </div>
     </div>
@@ -158,21 +140,23 @@
             <div class="col">
               <q-select clearable name="archivo" label="Archivo" :options="archivos" v-model="registro_archivo"/>
               <q-select clearable name="fondo" label="Fondo" :options="fondos" v-model="registro_fondo"/>
+              <q-select clearable name="tipo_documento" label="Tipo de documento" :options="tipos_documento" v-model="registro_tipodocumento"/>
               <q-input clearable name="libro" label="Libro" v-model="registro_libro" type="number" min="1"/>
-              <q-input clearable name="foja" label="Foja" v-model="registro_foja"/>
+              <q-input clearable name="foja" label="Fojas" v-model="registro_foja"/>
               <q-input clearable name="caja" label="Caja" v-model="registro_caja"/>
               <q-input clearable name="expediente" label="Expediente" v-model="registro_expediente"/>
               <q-select clearable name="años" label="Años" v-model="registro_anos" use-input use-chips multiple
                         hide-dropdown-icon input-debounce="0" new-value-mode="add-unique"/>
               <q-select clearable name="lugar" label="Lugar" :options="lugares" v-model="registro_lugar"/>
               <q-select clearable name="ramo" label="Ramo" :options="ramos" v-model="registro_ramo"/>
-              <q-input clearable name="encabezado" label="Encabezado" v-model="registro_encabezado"/>
+              <q-input clearable name="encabezado" label="Encabezado y/o resumen" type="textarea" rows="1" autogrow v-model="registro_encabezado"/>
+              <q-input clearable name="personas_involucradas" label="Personas involucradas" type="textarea" rows="1" autogrow
+                       v-model="registro_personasinvolucradas"/>
               <q-input clearable name="transcripcion" label="Transcripción" type="textarea" rows="1" autogrow
                        v-model="registro_transcripcion"/>
               <q-input clearable name="observaciones" label="Observaciones" type="textarea"
-                       rows="1" autogrow v-model="registro_transcripcion"/>
-              <q-input clearable name="notas" label="Notas" type="textarea"
-                       rows="1" autogrow v-model="registro_transcripcion"/>
+                       rows="1" autogrow v-model="registro_observaciones"/>
+              <q-input clearable name="notas" label="Notas" type="textarea" rows="1" autogrow v-model="registro_notas"/>
             </div>
           </div>
         </q-card-section>
@@ -198,21 +182,24 @@
             <div class="col">
               <q-select clearable name="archivo" label="Archivo" :options="archivos" v-model="registro_archivo"/>
               <q-select clearable name="fondo" label="Fondo" :options="fondos" v-model="registro_fondo"/>
+              <q-select clearable name="tipo_documento" label="Tipo de documento" :options="tipos_documento" v-model="registro_tipodocumento"/>
               <q-input clearable name="libro" label="Libro" v-model="registro_libro" type="number" min="1"/>
-              <q-input clearable name="foja" label="Foja" v-model="registro_foja"/>
+              <q-input clearable name="foja" label="Fojas" v-model="registro_foja"/>
               <q-input clearable name="caja" label="Caja" v-model="registro_caja"/>
               <q-input clearable name="expediente" label="Expediente" v-model="registro_expediente"/>
               <q-select clearable name="años" label="Años" v-model="registro_anos" use-input use-chips multiple
                         hide-dropdown-icon input-debounce="0" new-value-mode="add-unique"/>
               <q-select clearable name="lugar" label="Lugar" :options="lugares" v-model="registro_lugar"/>
               <q-select clearable name="ramo" label="Ramo" :options="ramos" v-model="registro_ramo"/>
-              <q-input clearable name="encabezado" label="Encabezado" v-model="registro_encabezado"/>
+              <q-input clearable name="encabezado" label="Encabezado y/o resumen" type="textarea" rows="1" autogrow v-model="registro_encabezado"/>
+              <q-input clearable name="personas_involucradas" label="Personas involucradas" type="textarea" rows="1" autogrow
+                       v-model="registro_personasinvolucradas"/>
               <q-input clearable name="transcripcion" label="Transcripción" type="textarea" rows="1" autogrow
                        v-model="registro_transcripcion"/>
               <q-input clearable name="observaciones" label="Observaciones" type="textarea"
-                       rows="1" autogrow v-model="registro_transcripcion"/>
+                       rows="1" autogrow v-model="registro_observaciones"/>
               <q-input clearable name="notas" label="Notas" type="textarea"
-                       rows="1" autogrow v-model="registro_transcripcion"/>
+                       rows="1" autogrow v-model="registro_notas"/>
             </div>
           </div>
         </q-card-section>
@@ -246,9 +233,10 @@
                         v-model="registro_archivo"/>
               <q-select v-if="registro_fondo" readonly name="fondo" label="Fondo" :options="fondos"
                         v-model="registro_fondo"/>
+              <q-select v-if="registro_tipodocumento" readonly name="tipo_documento" label="Tipo de documento" :options="tipos_documento" v-model="registro_tipodocumento"/>
               <q-input v-if="registro_libro" readonly name="libro" label="Libro" v-model="registro_libro" type="number"
                        min="1"/>
-              <q-input v-if="registro_foja" readonly name="foja" label="Foja" v-model="registro_foja"/>
+              <q-input v-if="registro_foja" readonly name="foja" label="Fojas" v-model="registro_foja"/>
               <q-input v-if="registro_caja" readonly name="caja" label="Caja" v-model="registro_caja"/>
               <q-input v-if="registro_expediente" readonly name="expediente" label="Expediente"
                        v-model="registro_expediente"/>
@@ -259,17 +247,20 @@
                         v-model="registro_lugar"/>
               <q-select v-if="registro_ramo" readonly name="ramo" label="Ramo" :options="ramos"
                         v-model="registro_ramo"/>
-              <q-input v-if="registro_encabezado" readonly name="encabezado" label="Encabezado"
-                       v-model="registro_encabezado"/>
+              <q-input v-if="registro_encabezado" readonly name="encabezado" label="Encabezado y/o resumen"
+                       type="textarea" rows="1" autogrow v-model="registro_encabezado"/>
+              <q-input v-if="registro_personasinvolucradas" readonly name="personas_involucradas"
+                       label="Personas involucradas" type="textarea" rows="1" autogrow
+                       v-model="registro_personasinvolucradas"/>
               <q-input v-if="registro_transcripcion" readonly name="transcripcion" label="Transcripción" type="textarea"
                        rows="1" autogrow
                        v-model="registro_transcripcion"/>
-              <q-input v-if="registro_transcripcion" readonly name="observaciones" label="Observaciones" type="textarea"
+              <q-input v-if="registro_observaciones" readonly name="observaciones" label="Observaciones" type="textarea"
                        rows="1" autogrow
-                       v-model="registro_transcripcion"/>
-              <q-input v-if="registro_transcripcion" readonly name="notas" label="Notas" type="textarea"
+                       v-model="registro_observaciones"/>
+              <q-input v-if="registro_notas" readonly name="notas" label="Notas" type="textarea"
                        rows="1" autogrow
-                       v-model="registro_transcripcion"/>
+                       v-model="registro_notas"/>
 
             </div>
           </div>
@@ -302,6 +293,7 @@ export default {
       registro_archivo: undefined,
       registro_fondo: undefined,
       registro_libro: undefined,
+      registro_tipodocumento: undefined,
       registro_foja: undefined,
       registro_caja: undefined,
       registro_expediente: undefined,
@@ -309,6 +301,7 @@ export default {
       registro_lugar: undefined,
       registro_ramo: undefined,
       registro_encabezado: undefined,
+      registro_personasinvolucradas: undefined,
       registro_notas: undefined,
       registro_observaciones: undefined,
       registro_transcripcion: undefined,
@@ -318,6 +311,7 @@ export default {
         {name: 'id', align: 'left', label: 'ID', field: 'id', sortable: true},
         {name: 'archivo', align: 'left', label: 'Archivo', field: 'archivo', sortable: true},
         {name: 'fondo', align: 'left', label: 'Fondo', field: 'fondo', sortable: true},
+        {name: 'tipo_documento', align: 'left', label: 'Tipo de documento', field: 'tipo_documento', sortable: true},
         {name: 'libro', align: 'left', label: 'Libro', field: 'libro', sortable: true},
         {name: 'foja', align: 'left', label: 'Foja', field: 'foja', sortable: true},
         {name: 'caja', align: 'left', label: 'Caja', field: 'caja', sortable: true},
@@ -325,18 +319,21 @@ export default {
         {name: 'años', align: 'left', label: 'Años', field: 'años', sortable: true},
         {name: 'lugar', align: 'left', label: 'Lugar', field: 'lugar', sortable: true},
         {name: 'ramo', align: 'left', label: 'Ramo', field: 'ramo', sortable: true},
-        {name: 'creacion', align: 'left', label: 'Creación', field: 'creacion', sortable: true},
-        {name: 'actualiza', align: 'left', label: 'Actualiza', field: 'actualiza', sortable: true},
-        {name: 'actualizacion', align: 'left', label: 'Actualización', field: 'actualizacion', sortable: true},
         {name: 'encabezado', align: 'left', label: 'Encabezado', field: 'encabezado', sortable: true},
+        {name: 'personas_involucradas', align: 'left', label: 'Personas involucradas', field: 'personas_involucradas', sortable: true},
         {name: 'transcripcion', align: 'left', label: 'Transcripcion', field: 'transcripcion', sortable: true},
         {name: 'observaciones', align: 'left', label: 'Observaciones', field: 'observaciones', sortable: true},
+        {name: 'creacion', align: 'left', label: 'Creación', field: 'creacion', sortable: true},
+        {name: 'crea', align: 'left', label: 'Crea', field: 'crea', sortable: true},
+        {name: 'actualizacion', align: 'left', label: 'Actualización', field: 'actualizacion', sortable: true},
+        {name: 'actualiza', align: 'left', label: 'Actualiza', field: 'actualiza', sortable: true},
       ],
       visible_columnas: ['archivo', 'fondo', 'libro', 'foja', 'años', 'lugar', 'ramo', 'crea'],
       archivos: undefined,
       fondos: undefined,
       lugares: undefined,
       ramos: undefined,
+      tipos_documento: undefined,
       datos_registros: [],
       es_usuario: false,
       es_admin: false,
@@ -345,14 +342,7 @@ export default {
       firebaseRef: firebaseDB.collection('Registro'),
     }
   },
-  computed: {
-    todaysDate() {
-      let timeStamp = Date.now()
-      return date.formatDate(timeStamp, 'YYYY-MM-DD')
-    }
-  },
   mounted() {
-    this.getCampos()
     this.getRegistros()
   },
   created() {
@@ -389,6 +379,7 @@ export default {
       }
       this.registro_archivo = undefined
       this.registro_fondo = undefined
+      this.registro_tipodocumento = undefined
       this.registro_libro = undefined
       this.registro_foja = undefined
       this.registro_caja = undefined
@@ -440,6 +431,14 @@ export default {
         this.archivos = []
       })
     },
+    getTiposDocumento() {
+      firebaseDB.collection('Config').doc('form').get().then(resDB => {
+        this.tipos_documento = resDB.data().tipo_documento
+      }).catch(error => {
+        console.log(error)
+      })
+
+    },
     getFondos() {
       firebaseDB.collection('Fondo').get().then(resDB => {
         let datos_fondos = [];
@@ -484,6 +483,7 @@ export default {
       this.getFondos()
       this.getLugares()
       this.getRamos()
+      this.getTiposDocumento()
     },
     getRegistros() {
       this.tabla_loading = true
@@ -495,14 +495,11 @@ export default {
           if (res.data().años) {
             years = res.data().años.join(", ")
           }
-          let notas = "";
-          if (res.data().notas) {
-            notas = res.data().notas.join(" / ")
-          }
           const registro = {
             id: res.id,
             archivo: res.data().archivo,
             fondo: res.data().fondo,
+            tipo_documento: res.data().tipo_documento,
             libro: res.data().libro,
             foja: res.data().foja,
             caja: res.data().caja,
@@ -511,7 +508,8 @@ export default {
             lugar: res.data().lugar,
             ramo: res.data().ramo,
             encabezado: res.data().encabezado,
-            notas: notas,
+            personas_involucradas: res.data().personas_involucradas,
+            notas: res.data().notas,
             transcripcion: res.data().transcripcion,
             crea: res.data().crea,
             creacion: res.data().creacion,
@@ -531,6 +529,7 @@ export default {
       const data_registro = {}
       if (this.registro_archivo) data_registro['archivo'] = this.registro_archivo
       if (this.registro_fondo) data_registro['fondo'] = this.registro_fondo
+      if (this.registro_tipodocumento) data_registro['tipo_documento'] = this.registro_tipodocumento
       if (this.registro_libro) data_registro['libro'] = this.registro_libro
       if (this.registro_foja) data_registro['foja'] = this.registro_foja
       if (this.registro_caja) data_registro['caja'] = this.registro_caja
@@ -539,18 +538,19 @@ export default {
       if (this.registro_lugar) data_registro['lugar'] = this.registro_lugar
       if (this.registro_ramo) data_registro['ramo'] = this.registro_ramo
       if (this.registro_encabezado) data_registro['encabezado'] = this.registro_encabezado
+      if (this.registro_personasinvolucradas) data_registro['personas_involucradas'] = this.registro_personasinvolucradas
       if (this.registro_notas) data_registro['notas'] = this.registro_notas
       if (this.registro_observaciones) data_registro['observaciones'] = this.registro_observaciones
       if (this.registro_transcripcion) data_registro['transcripcion'] = this.registro_transcripcion
       data_registro['crea'] = this.user_displayname
       data_registro['creacion'] = date.formatDate(Date.now(), 'YYYY-MM-DD')
-
       firebaseDB.collection('Registro').add(data_registro)
     },
     updateRegistro() {
       const data_registro = {}
       if (this.registro_archivo) data_registro['archivo'] = this.registro_archivo
       if (this.registro_fondo) data_registro['fondo'] = this.registro_fondo
+      if (this.registro_tipodocumento) data_registro['tipo_documento'] = this.registro_tipodocumento
       if (this.registro_libro) data_registro['libro'] = this.registro_libro
       if (this.registro_foja) data_registro['foja'] = this.registro_foja
       if (this.registro_caja) data_registro['caja'] = this.registro_caja
@@ -559,6 +559,7 @@ export default {
       if (this.registro_lugar) data_registro['lugar'] = this.registro_lugar
       if (this.registro_ramo) data_registro['ramo'] = this.registro_ramo
       if (this.registro_encabezado) data_registro['encabezado'] = this.registro_encabezado
+      if (this.registro_personasinvolucradas) data_registro['personas_involucradas'] = this.registro_personasinvolucradas
       if (this.registro_notas) data_registro['notas'] = this.registro_notas
       if (this.registro_observaciones) data_registro['observaciones'] = this.registro_observaciones
       if (this.registro_transcripcion) data_registro['transcripcion'] = this.registro_transcripcion
@@ -572,6 +573,7 @@ export default {
     limpiar_campos() {
       this.registro_archivo = undefined
       this.registro_fondo = undefined
+      this.registro_tipodocumento = undefined
       this.registro_libro = undefined
       this.registro_foja = undefined
       this.registro_caja = undefined
@@ -580,19 +582,23 @@ export default {
       this.registro_lugar = undefined
       this.registro_ramo = undefined
       this.registro_encabezado = undefined
+      this.registro_personasinvolucradas = undefined
       this.registro_notas = undefined
       this.registro_observaciones = undefined
       this.registro_transcripcion = undefined
       this.registro_usuario = undefined
     },
     addRegistroDialog() {
+      this.limpiar_campos()
       this.dialogo_nuevoregistro = true
     },
     editRegistroDialog(props) {
+      this.limpiar_campos()
       this.dialogo_editarregistro = true
       if (props.row.id) this.registro_id = props.row.id
       if (props.row.archivo) this.registro_archivo = props.row.archivo
       if (props.row.fondo) this.registro_fondo = props.row.fondo
+      if (props.row.tipo_documento) this.registro_tipodocumento = props.row.tipo_documento
       if (props.row.libro) this.registro_libro = props.row.libro
       if (props.row.foja) this.registro_foja = props.row.foja
       if (props.row.caja) this.registro_caja = props.row.caja
@@ -601,15 +607,18 @@ export default {
       if (props.row.lugar) this.registro_lugar = props.row.lugar
       if (props.row.ramo) this.registro_ramo = props.row.ramo
       if (props.row.encabezado) this.registro_encabezado = props.row.encabezado
+      if (props.row.personas_involucradas) this.registro_personasinvolucradas = props.row.personas_involucradas
       if (props.row.notas) this.registro_notas = props.row.notas
       if (props.row.observaciones) this.registro_observaciones = props.row.observaciones
       if (props.row.transcripcion) this.registro_transcripcion = props.row.transcripcion
     },
     deleteRegistroDialog(props) {
+      this.limpiar_campos()
       this.dialogo_eliminarregistro = true
       if (props.row.id) this.eliminar_registro_id = props.row.id
       if (props.row.archivo) this.registro_archivo = props.row.archivo
       if (props.row.fondo) this.registro_fondo = props.row.fondo
+      if (props.row.tipo_documento) this.registro_tipodocumento = props.row.tipo_documento
       if (props.row.libro) this.registro_libro = props.row.libro
       if (props.row.foja) this.registro_foja = props.row.foja
       if (props.row.caja) this.registro_caja = props.row.caja
@@ -618,6 +627,7 @@ export default {
       if (props.row.lugar) this.registro_lugar = props.row.lugar
       if (props.row.ramo) this.registro_ramo = props.row.ramo
       if (props.row.encabezado) this.registro_encabezado = props.row.encabezado
+      if (props.row.personas_involucradas) this.registro_personasinvolucradas = props.row.personas_involucradas
       if (props.row.notas) this.registro_notas = props.row.notas
       if (props.row.observaciones) this.registro_observaciones = props.row.observaciones
       if (props.row.transcripcion) this.registro_transcripcion = props.row.transcripcion
