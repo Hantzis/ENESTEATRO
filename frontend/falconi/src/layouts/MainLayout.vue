@@ -177,6 +177,7 @@
             importancia que en dicha licenciatura reviste la línea de investigación y área terminal de Artes Verbales,
             siendo el teatro justamente una de dichas artes: un interesante espacio de hibridación entre lo oral, lo
             escrito, lo visual y lo gestual.</p>
+          <p class="text-right">Aplicación Web Progresiva desarrollada por <a href="https://www.saeba.click" target="_blank">César Benjamín García Martínez</a> dentro del proyecto PAPIIT PE401720</p>
         </q-card-section>
       </q-card>
     </q-dialog>
