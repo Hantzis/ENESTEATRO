@@ -203,7 +203,7 @@ export default {
           } else {
             console.log("NO ES ADMIN")
           }
-        })
+        }).catch(() => {})
       } else {
         this.es_usuario = false;
       }
@@ -218,9 +218,7 @@ export default {
         response.forEach(res => {
           this.datos_archivos[res.id] = {id: res.id, nombre: res.data().nombre}
         })
-      }).catch(error => {
-        console.log(error)
-      }).finally(() => {
+      }).catch(() => { }).finally(() => {
         this.tabla_loading = false
       })
     },

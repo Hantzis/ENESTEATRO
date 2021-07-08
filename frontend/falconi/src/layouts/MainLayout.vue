@@ -388,6 +388,7 @@ export default {
       const size = argsize
       return 'https://www.gravatar.com/avatar/' + md5(email.trim().toLowerCase(), 'hex') + '.jpg?s=' + size;
     },
+
     login() {
       firebase.auth().signInWithEmailAndPassword(this.login_email, this.login_password).then(response => {
         if (response.operationType === "signIn") {
@@ -400,7 +401,6 @@ export default {
           }, 200)
         }
       }).catch(error => {
-        console.log(error)
         if (error.code === "auth/invalid-email") {
           this.login_message = "La dirección email no tiene formato correcto."
         }
@@ -416,22 +416,19 @@ export default {
           this.open_dialog_logout = false
           this.login_message = ""
         }, 100)
-      }).catch(error => {
-        console.log(error)
-      })
+      }).catch(() => { })
     },
     updateProfile() {
       this.usuario.updateProfile({
         displayName: this.user_displayname
-      }).then(res => {
-        this.usuario.updatePassword(this.user_password).then(res => {
+      }).then(() => {
+        this.usuario.updatePassword(this.user_password).then(() => {
           this.user_password = undefined
           this.user_password_confirm = undefined
         }).catch(function (error) {
           console.log(error)
         });
-      }).catch(function (error) {
-        console.log(error)
+      }).catch(function () {
       }).finally(() => {
         this.open_dialog_profile = false
       });

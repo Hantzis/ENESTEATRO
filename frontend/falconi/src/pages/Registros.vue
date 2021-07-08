@@ -426,17 +426,14 @@ export default {
           datos_archivos.push(archivo)
         });
         this.archivos = datos_archivos
-      }).catch(error => {
-        console.log(error);
+      }).catch(() => {
         this.archivos = []
       })
     },
     getTiposDocumento() {
       firebaseDB.collection('Config').doc('form').get().then(resDB => {
         this.tipos_documento = resDB.data().tipo_documento
-      }).catch(error => {
-        console.log(error)
-      })
+      }).catch(() => { })
 
     },
     getFondos() {
@@ -447,8 +444,7 @@ export default {
           datos_fondos.push(fondo)
         });
         this.fondos = datos_fondos
-      }).catch(error => {
-        console.log(error);
+      }).catch(() => {
         this.fondos = []
       })
     },
@@ -460,8 +456,7 @@ export default {
           datos_lugares.push(lugar)
         });
         this.lugares = datos_lugares
-      }).catch(error => {
-        console.log(error);
+      }).catch(() => {
         this.lugares = []
       })
     },
@@ -473,8 +468,7 @@ export default {
           datos_ramos.push(lugar)
         });
         this.ramos = datos_ramos
-      }).catch(error => {
-        console.log(error);
+      }).catch(() => {
         this.ramos = []
       })
     },
@@ -518,8 +512,7 @@ export default {
           };
           this.datos_registros.push(registro);
         });
-      }).catch(error => {
-        console.log(error);
+      }).catch(() => {
         this.tabla_loading = false;
       }).finally(() => {
         this.tabla_loading = false

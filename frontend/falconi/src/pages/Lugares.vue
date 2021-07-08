@@ -199,11 +199,8 @@ export default {
         firebaseDB.collection('Config').doc('usuarios').get().then(resDB => {
           if (resDB.data().admin.some(x => x === user.email)) {
             this.es_admin = true
-            console.log("ES ADMIN")
-          } else {
-            console.log("NO ES ADMIN")
           }
-        })
+        }).catch(() => { })
       } else {
         this.es_usuario = false;
       }
@@ -218,9 +215,7 @@ export default {
         response.forEach(res => {
           this.datos_lugares[res.id] = {id: res.id, nombre: res.data().nombre}
         })
-      }).catch(error => {
-        console.log(error)
-      }).finally(() => {
+      }).catch(() => { }).finally(() => {
         this.tabla_loading = false
       })
     },
